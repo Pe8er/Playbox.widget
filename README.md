@@ -1,6 +1,6 @@
 # Playbox for [Übersicht](http://tracesof.net/uebersicht/)
 
-![](https://raw.githubusercontent.com/Pe8er/uWidgets-Distribution/master/Sidebar/screenshot.png)
+![](https://raw.githubusercontent.com/Pe8er/Playbox.Widget/master/Playbox/screenshot.png)
 
 Now-playing-status widget. Supports iTunes and Spotify. It has a spiffy progress bar but no artwork support for Spotify. It's Spotify's fault, I promise!
 
