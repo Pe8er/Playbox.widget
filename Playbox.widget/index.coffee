@@ -11,7 +11,7 @@ refreshFrequency: 1000
 style: """
 
   white06 = rgba(white,0.6)
-  black02 = rgba(black,0.2)
+  black02 = rgba(black,0.8)
   scale = 1
   bg-blur = 20px
 
@@ -55,6 +55,14 @@ style: """
     overflow: hidden
     text-overflow: ellipsis
 
+  .artwork
+    width: 100%
+    height: auto
+    display: block
+    margin-bottom: -56px * scale
+    position: relative
+    z-index: -1
+
   .song
     font-weight: 700
 
@@ -74,12 +82,40 @@ render: -> """
 
 # Update the rendered output.
 update: (output, domEl) ->
-
   # Get our main DIV.
   div = $(domEl)
 
   # Get our pieces
   values = output.split(" ~ ")
+
+  # Get artwork from data
+  getAlbumArtwork = ( data ) ->
+    tmp = '';
+
+    data.tracks.items.forEach (album, i) ->
+      if album.name == values[1]
+        tmp = album.album.images[0].url;
+
+    return tmp;
+
+  # Get Album Artwork
+  getAlbum = ( url, cb ) ->
+    request = new XMLHttpRequest();
+    request.open('GET', reqUrl, true);
+    request.onload = ->
+      if request.status >= 200 && request.status < 400
+        data = JSON.parse(request.responseText);
+        albumArtwork = getAlbumArtwork( data );
+        cb( albumArtwork );
+
+      else
+        console.log( 'error' );
+        cb( false );
+
+    request.onerror = ->
+      console.log( 'request.onerror' );
+
+    request.send();
 
   # Initialize our HTML.
   medianowHTML = ''
@@ -93,10 +129,22 @@ update: (output, domEl) ->
   # Make it disappear if nothing is playing
   if values[0] != 'Nothing playing'
 
-    # Create the DIVs for each piece of data.
     $(domEl).animate({ opacity: 1 }, 500)
+  else
+    $(domEl).animate({ opacity: 0 }, 500)
+
+  # Set the HTML of our main DIV.
+  reqUrl = 'https://api.spotify.com/v1/search?q=' + encodeURI( values[1] ) + '&type=track';
+
+  bozo = (artwork ) ->
+    img = '';
+
+    if( artwork )
+      img = "<img class='artwork' src='" + artwork + "' />"
+
     medianowHTML = "
       <canvas class='media-bg-slice'></canvas>
+      " + img + "
       <div class='wrapper'>
         <div class='song'>" + values[1] + "</div>
         <div class='by'> by </div>
@@ -105,11 +153,10 @@ update: (output, domEl) ->
         <div class='album'>" + values[2] + "</div>
         <div class='progress'></div>
       </div>"
-  else
-    $(domEl).animate({ opacity: 0 }, 500)
 
-  # Set the HTML of our main DIV.
-  div.html(medianowHTML)
+    div.html(medianowHTML)
+
+  getAlbum( reqUrl, bozo )
 
   if tDuration == 'NA'
     $(domEl).find('.progress').css width: "0"
