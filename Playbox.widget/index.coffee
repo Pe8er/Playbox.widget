@@ -27,15 +27,17 @@ style: """
   vPos = #{options.vPosition}
   hPos = #{options.hPosition}
 
-  #{options.vPosition} margin
-  #{options.hPosition} margin
-
   if vPos == center
     top 50%
     transform translateY(-50%)
+  else
+    #{options.vPosition} margin
+
   if hPos == center
     left 50%
     transform translateX(-50%)
+  else
+    #{options.hPosition} margin
 
   // Different styles for different widget sizes.
   widgetVariant = #{options.widgetVariant}
