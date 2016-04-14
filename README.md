@@ -9,7 +9,7 @@ This widget shows currently played song in either iTunes or Spotify. It has a sp
 ## Features
 
 - Supports both Spotify and iTunes
-- Shows artwork (courtesy of [last.fm](www.last.fm))
+- Shows artwork (courtesy of [last.fm](http://www.last.fm))
 - Progress bar
 - Three size variants
 - Easy way to toggle the widget's visibility
