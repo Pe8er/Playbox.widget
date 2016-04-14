@@ -1,9 +1,14 @@
 # Playbox for [Übersicht](http://tracesof.net/uebersicht/)
 
+<<<<<<< HEAD
 <img src="https://github.com/Pe8er/Playbox.widget/blob/master/screenshot.jpg" width="516" height="320">
+=======
+![](https://raw.githubusercontent.com/Pe8er/Playbox.Widget/master/screenshot.png)
+>>>>>>> 986f6267a6795df623b8873c1e5bebbfc258d28b
 
 ## [Download](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
 
+<<<<<<< HEAD
 This widget shows currently played song in either iTunes or Spotify. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and last but not least: it comes in **three variants**!
 
 ## Features
@@ -34,3 +39,10 @@ options =
 ```
 
 [See my other widgets](https://github.com/Pe8er/Ubersicht-Widgets)
+=======
+## TODO
+- Clean up the code so it reflects the Playbox in [Sidebar widget](https://github.com/Pe8er/Sidebar.Widget).
+- Figure out Spotify cover art support. 
+
+[See my other widgets](https://github.com/Pe8er/Ubersicht-Widgets)
+>>>>>>> 986f6267a6795df623b8873c1e5bebbfc258d28b
