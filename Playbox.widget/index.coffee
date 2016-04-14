@@ -1,76 +1,144 @@
+# Code originally created by the awesome members of Ubersicht community.
+# I stole from so many I can't remember who you are, thank you so much everyone!
+# Haphazardly adjusted and mangled by Pe8er (https://github.com/Pe8er)
 
-# A widget that shows what's currently playing in either iTunes or Spotify.
-# Assembled by Piotr Gajos
-# https://github.com/Pe8er/Ubersicht-Widgets
-# I don't know how to write code, so I obviously pulled pieces from all over the place, particularly from Chris Johnson's World Clock widget. Also big thanks to Josh "Baby Boi" Rutherford.
+options =
+  # Easily enable or disable the widget.
+  widgetEnable: true
 
-command: "osascript 'Playbox.widget/Get Current Track.scpt'"
+  # Choose your widget.
+  widgetVariant: "medium"       # large | medium | small
 
-refreshFrequency: 1000
+  # Choose where the widget should sit on your screen.
+  vPosition: "bottom"           # top | bottom | center
+  hPosition: "left"             # left | right | center
+
+command: "osascript 'Playbox.widget/as/Get Current Track.applescript'"
+refreshFrequency: '1s'
 
 style: """
 
-  white06 = rgba(white,0.6)
-  black02 = rgba(black,0.2)
-  scale = 1
-  bg-blur = 20px
+  // A few useful variables.
+  white05 = rgba(white,0.5)
+  margin = 20px
+  transform-style preserve-3d
 
-  bottom: (58px + 8) * scale
-  left: 8px * scale
-  width: 325px * scale
-  overflow: hidden
-  white-space: nowrap
-  opacity: 0
+  // Let's sort out positioning.
+  vPos = #{options.vPosition}
+  hPos = #{options.hPosition}
+
+  #{options.vPosition} margin
+  #{options.hPosition} margin
+
+  if vPos == center
+    top 50%
+    transform translateY(-50%)
+  if hPos == center
+    left 50%
+    transform translateX(-50%)
+
+  // Different styles for different widget sizes.
+  widgetVariant = #{options.widgetVariant}
+  if widgetVariant == medium
+    wScale = 0.75
+    .album
+      display none
+  else
+    wScale = 1
+
+  // All the rest.
+  width auto
+  min-width 200px
+  overflow hidden
+  white-space nowrap
+  opacity 0
+  display none
+  position absolute
+  box-shadow 0 20px 50px 10px rgba(0,0,0,.6)
+  -webkit-backdrop-filter blur(20px) brightness(60%) contrast(130%) saturate(140%)
 
   .wrapper
-    position: relative
-    font-family: "Helvetica Neue"
-    text-align: left
-    font-size: 8pt * scale
-    line-height: 12pt * scale
-    -webkit-font-smoothing: antialiased
-    color: white
-    background: black02
-    border: 1px * scale solid white06
-    padding: (6px * scale) (12px * scale)
-    height: 38px * scale
+    font-size 8pt
+    line-height 11pt
+    color white
+    display flex
+    flex-direction row
+    justify-content flex-start
+    flex-wrap nowrap
+    align-items center
+
+  .art
+    width 64px
+    height @width
+    background-image url(Playbox.widget/as/default.png)
+    -webkit-transition background-image 0.5s ease-in-out
+    background-size cover
+
+  .text
+    left 64px
+    margin 0 32px 0 8px
 
   .progress
-    width: @width
-    height: 2px * scale
-    background: white06
-    position: absolute
-    bottom: 0
-    left: 0
+    width @width
+    height 2px
+    background white
+    position absolute
+    bottom 0
+    left 0
 
-  .media-bg-slice
-    position: absolute
-    top: -2*(bg-blur)
-    left: -2*(bg-blur)
-    width: 100% + 6*bg-blur
-    height: 100% + 6*bg-blur
-    -webkit-filter: blur(bg-blur)
-
-  .wrapper, .album
-    overflow: hidden
-    text-overflow: ellipsis
+  .wrapper, .album, .artist, .song
+    overflow hidden
+    text-overflow ellipsis
 
   .song
-    font-weight: 700
+    font-weight 700
 
-  .song, .artist, .by
-    display: inline
+  .album
+    color white05
 
-  .album, .by
-    color: white06
+  if widgetVariant == large or widgetVariant == medium
+    min-width 0
 
-  .rating
-    float: right
-    position: relative
-  """
+    .wrapper
+      flex-direction column
+      justify-content flex-start
+      flex-wrap nowrap
+      align-items center
 
-render: -> """
+    .art
+      width 200px * wScale
+      height @width
+      margin 0
+
+    .text
+      margin 8px
+      float none
+      text-align center
+      max-width (200px * wScale) - 20
+
+    .progress
+      top 200px * wScale
 """
+
+options : options
+
+render: (output) ->
+  # Initialize our HTML.
+  playboxHTML = ''
+
+  # Create the DIVs for each piece of data.
+  playboxHTML = "
+    <div class='wrapper'>
+      <div class='art'></div>
+      <div class='text'>
+        <div class='song'></div>
+        <div class='artist'></div>
+        <div class='album'></div>
+      </div>
+      <div class='progress'></div>
+    </div>"
+
+  return playboxHTML
 
 # Update the rendered output.
 update: (output, domEl) ->
@@ -78,43 +146,42 @@ update: (output, domEl) ->
   # Get our main DIV.
   div = $(domEl)
 
-  # Get our pieces
-  values = output.split(" ~ ")
+  if @options.widgetEnable
+    # Get our pieces.
+    values = output.slice(0,-1).split(" ~ ")
 
-  # Initialize our HTML.
-  medianowHTML = ''
+    # Initialize our HTML.
+    playboxHTML = ''
 
-  # Progress bar things
-  tDuration = values[4]
-  tPosition = values[5]
-  tWidth = $(domEl).width();
-  tCurrent = (tPosition / tDuration) * tWidth
+    # Progress bar things.
+    tDuration = values[4]
+    tPosition = values[5]
+    tArtwork = values[6]
+    tWidth = div.width();
+    tCurrent = (tPosition / tDuration) * tWidth
 
-  # Make it disappear if nothing is playing
-  if values[0] != 'Nothing playing'
+    currArt = div.find('.art').css('background-image').split('/').pop().slice(0,-1)
 
-    # Create the DIVs for each piece of data.
-    $(domEl).animate({ opacity: 1 }, 500)
-    medianowHTML = "
-      <canvas class='media-bg-slice'></canvas>
-      <div class='wrapper'>
-        <div class='song'>" + values[1] + "</div>
-        <div class='by'> by </div>
-        <div class='artist'>" + values[0] + "</div>
-        <div class='rating'>" + values[3] + "</div>
-        <div class='album'>" + values[2] + "</div>
-        <div class='progress'></div>
-      </div>"
+    if values[0] == 'NA'
+      div.animate({ opacity: 0 }, 250)
+      setTimeout(div.hide(1), 1)
+    else
+      div.animate({ opacity: 1 }, 250, "swing", setTimeout(div.show(1), 1))
+      div.find('.song').html(values[1])
+      div.find('.artist').html(values[0])
+      div.find('.album').html(values[2])
+      div.find('.progress').css width: tCurrent
+      if tArtwork isnt currArt
+        if tArtwork =='NA'
+          div.find('.art').css('background-image', 'url(Playbox.widget/as/default.png)')
+        else
+          div.find('.art').css('background-image', 'url('+tArtwork+')')
+
+    totalWidth = screen.width
+    div.css('max-width', totalWidth)
   else
-    $(domEl).animate({ opacity: 0 }, 500)
+    div.hide()
 
-  # Set the HTML of our main DIV.
-  div.html(medianowHTML)
-
-  if tDuration == 'NA'
-    $(domEl).find('.progress').css width: "0"
-  else
-    $(domEl).find('.progress').css width: tCurrent
-
-  afterRender: (domEl) ->
-  uebersicht.makeBgSlice(el) for el in $(domEl).find '.media-bg-slice'
+  # Sort out flex-box positioning.
+  # div.parent('div').css('order', '7')
+  # div.parent('div').css('flex', '0 1 auto')

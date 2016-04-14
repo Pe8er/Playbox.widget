@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>albumName</key>
+	<string>III</string>
+	<key>artistName</key>
+	<string>Moderat</string>
+	<key>coverURL</key>
+	<string>http://img2-ak.lst.fm/i/u/300x300/e69d8c2438d0922ec05fb4dcc1d1bca5.png</string>
+	<key>currentPosition</key>
+	<string>246.13200378418</string>
+	<key>songDuration</key>
+	<string>252.065994262695</string>
+	<key>songName</key>
+	<string>The Fool</string>
+	<key>songRating</key>
+	<string>☆☆☆☆☆</string>
+</dict>
+</plist>
