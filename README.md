@@ -20,7 +20,7 @@ This widget shows currently played song in either iTunes or Spotify. It has a sp
 
 Here's how you can set all the widget's options. Open `index.coffee` and look at the very beginning:
 
-```
+```coffeescript
 options =
   # Easily enable or disable the widget.
   widgetEnable: true

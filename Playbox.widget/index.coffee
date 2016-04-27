@@ -1,17 +1,16 @@
-# Code originally created by the awesome members of Ubersicht community.
 # I stole from so many I can't remember who you are, thank you so much everyone!
 # Haphazardly adjusted and mangled by Pe8er (https://github.com/Pe8er)
 
 options =
   # Easily enable or disable the widget.
-  widgetEnable: true
+  widgetEnable : true
 
   # Choose your widget.
-  widgetVariant: "medium"       # large | medium | small
+  widgetVariant: "medium"           # large | medium | small
 
   # Choose where the widget should sit on your screen.
-  vPosition: "bottom"           # top | bottom | center
-  hPosition: "left"             # left | right | center
+  vPosition    : "bottom"           # top | bottom | center
+  hPosition    : "left"             # left | right | center
 
 command: "osascript 'Playbox.widget/as/Get Current Track.applescript'"
 refreshFrequency: '1s'
