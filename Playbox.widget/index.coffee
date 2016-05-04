@@ -148,30 +148,31 @@ update: (output, domEl) ->
   div = $(domEl)
 
   if @options.widgetEnable
-    # Get our pieces.
-    values = output.slice(0,-1).split(" ~ ")
 
     # Initialize our HTML.
     playboxHTML = ''
 
-    # Progress bar things.
-    tDuration = values[4]
-    tPosition = values[5]
-    tArtwork = values[6]
-    tWidth = div.width();
-    tCurrent = (tPosition / tDuration) * tWidth
-
-    currArt = div.find('.art').css('background-image').split('/').pop().slice(0,-1)
-
-    if values[0] == 'NA'
-      div.animate({ opacity: 0 }, 250)
-      setTimeout(div.hide(1), 1)
+    if output.length == 0
+      div.animate {opacity: 0}, 250, 'swing'
+      callback = -> div.hide()
+      setTimeout callback, 1000
     else
-      div.animate({ opacity: 1 }, 250, "swing", setTimeout(div.show(1), 1))
+      div.show()
+      callback = -> div.animate {opacity: 1}, 250, 'swing'
+      setTimeout callback, 1000
+
+      values = output.slice(0,-1).split(" ~ ")
+      tDuration = values[4]
+      tPosition = values[5]
+      tArtwork = values[6]
+      tWidth = div.width()
+      tCurrent = (tPosition / tDuration) * tWidth
+      currArt = div.find('.art').css('background-image').split('/').pop().slice(0,-1)
       div.find('.song').html(values[1])
       div.find('.artist').html(values[0])
       div.find('.album').html(values[2])
       div.find('.progress').css width: tCurrent
+
       if tArtwork isnt currArt
         if tArtwork =='NA'
           div.find('.art').css('background-image', 'url(Playbox.widget/as/default.png)')
@@ -182,7 +183,3 @@ update: (output, domEl) ->
     div.css('max-width', totalWidth)
   else
     div.hide()
-
-  # Sort out flex-box positioning.
-  # div.parent('div').css('order', '7')
-  # div.parent('div').css('flex', '0 1 auto')
