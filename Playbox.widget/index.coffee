@@ -1,3 +1,4 @@
+# Code originally created by the awesome members of Ubersicht community.
 # I stole from so many I can't remember who you are, thank you so much everyone!
 # Haphazardly adjusted and mangled by Pe8er (https://github.com/Pe8er)
 
@@ -8,6 +9,9 @@ options =
   # Choose your widget.
   widgetVariant: "medium"           # large | medium | small
 
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
+  stickInCorner: false
+
   # Choose where the widget should sit on your screen.
   vPosition    : "bottom"           # top | bottom | center
   hPosition    : "left"             # left | right | center
@@ -17,26 +21,32 @@ refreshFrequency: '1s'
 
 style: """
 
-  // A few useful variables.
   white05 = rgba(white,0.5)
-  margin = 20px
+  mainDimension = 176px
   transform-style preserve-3d
 
-  // Let's sort out positioning.
-  vPos = #{options.vPosition}
-  hPos = #{options.hPosition}
 
-  if vPos == center
+  // Let's sort out positioning.
+
+  if #{options.stickInCorner} == false
+    margin = 20px
+    box-shadow 0 20px 50px 10px rgba(0,0,0,.6)
+    position absolute
+  else
+    margin = 0
+
+  if #{options.vPosition} == center
     top 50%
     transform translateY(-50%)
   else
     #{options.vPosition} margin
 
-  if hPos == center
+  if #{options.hPosition} == center
     left 50%
     transform translateX(-50%)
   else
     #{options.hPosition} margin
+
 
   // Different styles for different widget sizes.
   widgetVariant = #{options.widgetVariant}
@@ -47,16 +57,18 @@ style: """
   else
     wScale = 1
 
+
   // All the rest.
+
   width auto
-  min-width 200px
+  min-width 100px
+  max-width mainDimension
   overflow hidden
   white-space nowrap
   opacity 0
   display none
-  position absolute
-  box-shadow 0 20px 50px 10px rgba(0,0,0,.6)
   -webkit-backdrop-filter blur(20px) brightness(60%) contrast(130%) saturate(140%)
+  font-family system, -apple-system
 
   .wrapper
     font-size 8pt
@@ -107,7 +119,7 @@ style: """
       align-items center
 
     .art
-      width 200px * wScale
+      width mainDimension * wScale
       height @width
       margin 0
 
@@ -115,10 +127,10 @@ style: """
       margin 8px
       float none
       text-align center
-      max-width (200px * wScale) - 20
+      max-width (mainDimension * wScale) - 20
 
     .progress
-      top 200px * wScale
+      top mainDimension * wScale
 """
 
 options : options
@@ -157,10 +169,6 @@ update: (output, domEl) ->
       callback = -> div.hide()
       setTimeout callback, 1000
     else
-      div.show()
-      callback = -> div.animate {opacity: 1}, 250, 'swing'
-      setTimeout callback, 1000
-
       values = output.slice(0,-1).split(" ~ ")
       tDuration = values[4]
       tPosition = values[5]
@@ -179,7 +187,15 @@ update: (output, domEl) ->
         else
           div.find('.art').css('background-image', 'url('+tArtwork+')')
 
+      div.show()
+      callback = -> div.animate {opacity: 1}, 250, 'swing'
+      setTimeout callback, 1000
+
     totalWidth = screen.width
     div.css('max-width', totalWidth)
+
+    # Sort out flex-box positioning.
+    div.parent('div').css('order', '9')
+    div.parent('div').css('flex', '0 1 auto')
   else
     div.hide()
