@@ -68,7 +68,7 @@ style: """
   opacity 0
   display none
   -webkit-backdrop-filter blur(20px) brightness(60%) contrast(130%) saturate(140%)
-  font-family system, -apple-system
+  font-family system, -apple-system, "Helvetica Neue"
 
   .wrapper
     font-size 8pt
