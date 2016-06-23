@@ -7,7 +7,7 @@ options =
   widgetEnable : true
 
   # Choose your widget.
-  widgetVariant: "medium"           # large | medium | small
+  widgetVariant: "large"           # large | medium | small
 
   # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false
@@ -175,17 +175,13 @@ update: (output, domEl) ->
       tArtwork = values[6]
       tWidth = div.width()
       tCurrent = (tPosition / tDuration) * tWidth
-      currArt = div.find('.art').css('background-image').split('/').pop().slice(0,-1)
       div.find('.song').html(values[1])
       div.find('.artist').html(values[0])
       div.find('.album').html(values[2])
       div.find('.progress').css width: tCurrent
 
-      if tArtwork isnt currArt
-        if tArtwork =='NA'
-          div.find('.art').css('background-image', 'url(Playbox.widget/as/default.png)')
-        else
-          div.find('.art').css('background-image', 'url('+tArtwork+')')
+      if tArtwork isnt "NA"
+        div.find('.art').css('background-image', 'url('+tArtwork+')')
 
       div.show()
       callback = -> div.animate {opacity: 1}, 250, 'swing'
