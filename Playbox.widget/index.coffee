@@ -170,14 +170,14 @@ update: (output, domEl) ->
       setTimeout callback, 1000
     else
       values = output.slice(0,-1).split(" ~ ")
-      tDuration = values[4]
-      tPosition = values[5]
-      tArtwork = values[6]
+      div.find('.artist').html(values[0])
+      div.find('.song').html(values[1])
+      div.find('.album').html(values[2])
+      tDuration = values[3]
+      tPosition = values[4]
+      tArtwork = values[5]
       tWidth = div.width()
       tCurrent = (tPosition / tDuration) * tWidth
-      div.find('.song').html(values[1])
-      div.find('.artist').html(values[0])
-      div.find('.album').html(values[2])
       div.find('.progress').css width: tCurrent
 
       if tArtwork isnt "NA"
