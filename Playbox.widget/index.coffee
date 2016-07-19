@@ -13,8 +13,8 @@ options =
   stickInCorner: true
 
   # Choose where the widget should sit on your screen.
-  vPosition    : "top"           # top | bottom | center
-  hPosition    : "bottom"             # left | right | center
+  vPosition    : "bottom"           # top | bottom | center
+  hPosition    : "left"             # left | right | center
 
 command: "osascript 'Playbox.widget/as/Get Current Track.applescript'"
 refreshFrequency: '1s'
@@ -25,16 +25,13 @@ style: """
   mainDimension = 176px
   transform-style preserve-3d
 
-
   // Let's sort out positioning.
 
   if #{options.stickInCorner} == false
     margin = 20px
     box-shadow 0 20px 50px 10px rgba(0,0,0,.6)
-    position absolute
   else
     margin = 0
-    position absolute
 
   if #{options.vPosition} == center
     top 50%
@@ -66,8 +63,8 @@ style: """
   max-width mainDimension
   overflow hidden
   white-space nowrap
-  opacity 0
   display none
+  position absolute
   -webkit-backdrop-filter blur(20px) brightness(60%) contrast(130%) saturate(140%)
   font-family system, -apple-system, "Helvetica Neue"
 
@@ -192,7 +189,7 @@ update: (output, domEl) ->
     div.css('max-width', totalWidth)
 
     # Sort out flex-box positioning.
-    div.parent('div').css('order', '9')
-    div.parent('div').css('flex', '0 1 auto')
+    # div.parent('div').css('order', '9')
+    # div.parent('div').css('flex', '0 1 auto')
   else
     div.hide()
