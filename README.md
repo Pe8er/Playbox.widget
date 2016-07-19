@@ -23,14 +23,17 @@ Here's how you can set all the widget's options. Open `index.coffee` and look at
 ```coffeescript
 options =
   # Easily enable or disable the widget.
-  widgetEnable: true
+  widgetEnable : true
 
   # Choose your widget.
-  widgetVariant: "medium"       # large | medium | small
+  widgetVariant: "small"          # large | medium | small
+
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
+  stickInCorner: true
 
   # Choose where the widget should sit on your screen.
-  vPosition: "bottom"           # top | bottom | center
-  hPosition: "left"             # left | right | center
+  vPosition    : "top"            # top | bottom | center
+  hPosition    : "bottom"         # left | right | center
 ```
 
 [See my other widgets](https://github.com/Pe8er/Ubersicht-Widgets)

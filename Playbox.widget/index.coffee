@@ -7,14 +7,14 @@ options =
   widgetEnable : true
 
   # Choose your widget.
-  widgetVariant: "large"           # large | medium | small
+  widgetVariant: "small"           # large | medium | small
 
   # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
-  stickInCorner: false
+  stickInCorner: true
 
   # Choose where the widget should sit on your screen.
-  vPosition    : "bottom"           # top | bottom | center
-  hPosition    : "left"             # left | right | center
+  vPosition    : "top"           # top | bottom | center
+  hPosition    : "bottom"             # left | right | center
 
 command: "osascript 'Playbox.widget/as/Get Current Track.applescript'"
 refreshFrequency: '1s'
@@ -34,6 +34,7 @@ style: """
     position absolute
   else
     margin = 0
+    position absolute
 
   if #{options.vPosition} == center
     top 50%
@@ -61,7 +62,7 @@ style: """
   // All the rest.
 
   width auto
-  min-width 100px
+  min-width 250px
   max-width mainDimension
   overflow hidden
   white-space nowrap
