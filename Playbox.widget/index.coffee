@@ -165,7 +165,7 @@ update: (output, domEl) ->
     if output.length == 0
       div.animate {opacity: 0}, 250, 'swing'
       callback = -> div.hide()
-      setTimeout callback, 1000
+      setTimeout callback, 250
     else
       values = output.slice(0,-1).split(" ~ ")
       div.find('.artist').html(values[0])
@@ -182,8 +182,7 @@ update: (output, domEl) ->
         div.find('.art').css('background-image', 'url('+tArtwork+')')
 
       div.show()
-      callback = -> div.animate {opacity: 1}, 250, 'swing'
-      setTimeout callback, 1000
+      div.animate {opacity: 1}, 250, 'swing'
 
     totalWidth = screen.width
     div.css('max-width', totalWidth)
