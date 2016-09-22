@@ -1,39 +1,49 @@
 # Playbox for [Übersicht](http://tracesof.net/uebersicht/)
 
+This widget shows currently played song in either iTunes or Spotify. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and has a ton of customization options.
+
+## [Download Playbox](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
+
+# Features
+
 <img src="https://github.com/Pe8er/Playbox.widget/blob/master/screenshot.jpg" width="516" height="320">
 
-## [Download](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
+- Supports both Spotify and iTunes.
+- Shows artwork (courtesy of [last.fm](http://www.last.fm)).
+- Song progress bar.
+- Three size variants.
+- 🔥 Dark and light themes.
+- 🔥 Position song metadata inside or outside the artwork.
+- 🔥 If song meta is inside the artwork, it fades out automatically. Click the artwork to show it again.
+- Easy way to toggle the widget's visibility.
+- Easy way to position the widget on the screen.
+- Spiffy fade animations all over the place.
 
-This widget shows currently played song in either iTunes or Spotify. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and last but not least: it comes in **three variants**!
+# Options
 
-## Features
-
-- Supports both Spotify and iTunes
-- Shows artwork (courtesy of [last.fm](http://www.last.fm))
-- Progress bar
-- Three size variants
-- Easy way to toggle the widget's visibility
-- Easy way to position the widget on the screen
-- Spiffy fade animation on pause
-
-## Options
-
-Here's how you can set all the widget's options. Open `index.coffee` and look at the very beginning:
+Here's how you can set all the widget's options. Open `index.coffee` and look at the very top of the document:
 
 ```coffeescript
-options =
-  # Easily enable or disable the widget.
-  widgetEnable : true
-
-  # Choose your widget.
-  widgetVariant: "small"          # large | medium | small
-
-  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
-  stickInCorner: true
+  # Enable or disable the widget.
+  widgetEnable : true                   # true | false
 
   # Choose where the widget should sit on your screen.
-  vPosition    : "top"            # top | bottom | center
-  hPosition    : "bottom"         # left | right | center
+  verticalPosition    : "bottom"        # top | bottom | center
+  horizontalPosition    : "left"        # left | right | center
+
+  # Choose widget size.
+  widgetVariant: "large"                # large | medium | small
+
+  # Choose color theme.
+  widgetTheme: "dark"                   # dark | light
+
+  # Text inside or outside? Applies to large and medium variants only.
+  textPosition: "inside"                # inside | outside
+
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
+  stickInCorner: false                  # true | false
 ```
 
-[See my other widgets](https://github.com/Pe8er/Ubersicht-Widgets)
+## [Download Playbox](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
+
+[See my other widgets &rarr;](https://github.com/Pe8er/Ubersicht-Widgets)
