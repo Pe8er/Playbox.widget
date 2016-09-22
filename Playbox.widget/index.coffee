@@ -101,6 +101,9 @@ style: """
     overflow hidden
     text-overflow ellipsis
 
+  .album, .artist, .song
+    max-width mainDimension
+
   .song
     font-weight 700
 
