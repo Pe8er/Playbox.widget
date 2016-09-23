@@ -16,8 +16,8 @@ options =
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
 
-  # Text inside or outside? Applies to large and medium variants only.
-  textPosition: "inside"                # inside | outside
+  # Song metadata inside or outside? Applies to large and medium variants only.
+  metaPosition: "inside"                # inside | outside
 
   # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false                  # true | false
@@ -186,13 +186,13 @@ style: """
       text-align center
       max-width (mainDimension * Scale) - 20
 
-    if #{options.textPosition} == outside
+    if #{options.metaPosition} == outside
       .progress
         top mainDimension * Scale
       .art
         border-radius 6px 6px 0 0
 
-    if #{options.textPosition} == inside
+    if #{options.metaPosition} == inside
       background-color black
       -webkit-backdrop-filter none
 
@@ -225,15 +225,14 @@ render: () -> """
       <div class="album"></div>
     </div>
   </div>
-  <script src="lib/jquery.animate-shadow-min.js.lib"></script>
   """
 
 afterRender: (domEl) ->
-  $.getScript "Playbox.widget/lib/jquery.animate-shadow-min.js.lib"
+  $.getScript "Playbox.widget/lib/jquery.animate-shadow-min.js"
   div = $(domEl)
   meta = div.find('.text')
 
-  if @options.textPosition is 'inside' and @options.widgetVariant isnt 'small'
+  if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)
 
     div.click(
@@ -293,7 +292,7 @@ update: (output, domEl) ->
         # img.src = tArtwork
         # return
 
-      if songChanged is 'true' and @options.textPosition is 'inside' and @options.widgetVariant isnt 'small'
+      if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
         div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
 
     div.css('max-width', screen.width)

@@ -37,8 +37,8 @@ Here's how you can set all the widget's options. Open `index.coffee` and look at
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
 
-  # Text inside or outside? Applies to large and medium variants only.
-  textPosition: "inside"                # inside | outside
+  # Song metadata inside or outside? Applies to large and medium variants only.
+  metaPosition: "inside"                # inside | outside
 
   # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false                  # true | false
