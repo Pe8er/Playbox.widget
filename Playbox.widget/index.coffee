@@ -270,9 +270,11 @@ update: (output, domEl) ->
       div.find('.progress').css width: tCurrent
       div.show(1).animate({opacity: 1}, 250, 'swing')
 
-      if currArt isnt tArtwork and tArtwork isnt 'Na'
-        artwork = div.find('.art')
+      artwork = div.find('.art')
+      if currArt isnt tArtwork and tArtwork isnt 'NA'
         artwork.css('background-image', 'url('+tArtwork+')')
+      else if tArtwork is 'NA'
+        artwork.css('background-image', 'url(Playbox.widget/lib/default.png)')
 
         # Trying to fade the artwork on load, failing so far.
         # if songChanged is 'true'
