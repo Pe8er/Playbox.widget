@@ -22,3 +22,8 @@ build/
 thumbs.db
 Thumbs.db%
 songMeta.plist
+
+# Generated cover file #
+########################
+Playbox.widget/lib/cover.jpg
+Playbox.widget/lib/cover.png
