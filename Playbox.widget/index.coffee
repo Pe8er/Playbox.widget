@@ -11,7 +11,7 @@ options =
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "medium"                # large | medium | small
+  widgetVariant: "small"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -73,13 +73,17 @@ style: """
     transform translateY(-50%)
   else
     #{options.verticalPosition} margin
-
   if #{options.horizontalPosition} == center
     left 50%
     transform translateX(-50%)
   else
     #{options.horizontalPosition} margin
 
+//  if #{options.verticalPosition} != center
+//    #{options.verticalPosition} margin
+//
+//  if #{options.horizontalPosition} != center
+//    #{options.horizontalPosition} margin
 
   // Misc styles.
 
@@ -101,7 +105,7 @@ style: """
   font-family system, -apple-system, "Helvetica Neue"
   border none
   -webkit-backdrop-filter blurProperties
-  z-index 0
+  z-index 10
 
   .wrapper
     font-size 8pt
@@ -118,7 +122,8 @@ style: """
   .art
     width 64px
     height @width
-    background-image url(Playbox.widget/lib/default.png)
+    background-color fColor05
+    background-image url(/Playbox.widget/lib/default.png)
     background-size cover
     z-index 2
 
@@ -230,6 +235,7 @@ render: () -> """
 afterRender: (domEl) ->
   $.getScript "Playbox.widget/lib/jquery.animate-shadow-min.js"
   div = $(domEl)
+
   meta = div.find('.text')
 
   if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
@@ -252,11 +258,10 @@ update: (output, domEl) ->
   div = $(domEl)
 
   if @options.widgetEnable
-
     if !output
       div.animate({opacity: 0}, 250, 'swing').hide(1)
     else
-      values = output.slice(0,-1).split(" ~ ")
+      values = output.slice(0,-1).split(" @ ")
       div.find('.artist').html(values[0])
       div.find('.song').html(values[1])
       div.find('.album').html(values[2])
@@ -264,15 +269,29 @@ update: (output, domEl) ->
       tPosition = values[4]
       tArtwork = values[5]
       songChanged = values[6]
-      currArt = div.find('.art').css('background-image').split('/').pop().slice(0,-1)
+      currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
       tWidth = div.width()
       tCurrent = (tPosition / tDuration) * tWidth
       div.find('.progress').css width: tCurrent
+      # console.log(tArtwork + ", " + currArt)
+
+      # if @options.verticalPosition is 'center'
+      #   wrapHeight = div.find('.wrapper').height()
+      #   div.css('top', (screen.height - wrapHeight)/2)
+      # if @options.horizontalPosition is 'center'
+      #   wrapWidth = div.find('.wrapper').width()
+      #   div.css('left', (screen.width - wrapWidth)/2)
+      #
+      #
+      # div.closest('div').css('position', 'relative')
+
       div.show(1).animate({opacity: 1}, 250, 'swing')
 
-      if currArt isnt tArtwork and tArtwork isnt 'Na'
+      if currArt isnt tArtwork and tArtwork isnt 'NA'
         artwork = div.find('.art')
         artwork.css('background-image', 'url('+tArtwork+')')
+
+        # console.log("Changed to: " + tArtwork)
 
         # Trying to fade the artwork on load, failing so far.
         # if songChanged is 'true'
@@ -301,4 +320,4 @@ update: (output, domEl) ->
     # div.parent('div').css('order', '9')
     # div.parent('div').css('flex', '0 1 auto')
   else
-    div.hide()
+    div.remove()
