@@ -11,7 +11,7 @@ options =
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "small"                # large | medium | small
+  widgetVariant: "medium"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
