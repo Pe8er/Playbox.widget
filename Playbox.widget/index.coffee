@@ -310,6 +310,9 @@ update: (output, domEl) ->
 
         # img.src = tArtwork
         # return
+      else if tArtwork is 'NA'
+        artwork = div.find('.art')
+        artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
 
       if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
         div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
