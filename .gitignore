@@ -27,3 +27,7 @@ songMeta.plist
 ########################
 Playbox.widget/lib/cover.jpg
 Playbox.widget/lib/cover.png
+
+# gitattributes (used locally to diff applescript files) #
+##########################################################
+.gitattributes
