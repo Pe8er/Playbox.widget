@@ -3,15 +3,15 @@
 # Haphazardly adjusted and mangled by Pe8er (https://github.com/Pe8er)
 
 options =
-  # Enable or disable the widget.
-  widgetEnable : true                   # true | false
-
   # Choose where the widget should sit on your screen.
   verticalPosition    : "bottom"        # top | bottom | center
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
   widgetVariant: "medium"                # large | medium | small
+
+  # Do you want to enable a spiffy 3D look? It works only in bottom-left position.
+  enable3d: false                        # true | false
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -52,7 +52,6 @@ style: """
   bgColor02 = rgba(bgColor,0.2)
   blurProperties = blur(10px) brightness(bgBrightness) contrast(100%) saturate(140%)
 
-
   // Next, let's sort out positioning.
 
   if #{options.stickInCorner} == false
@@ -79,12 +78,6 @@ style: """
   else
     #{options.horizontalPosition} margin
 
-//  if #{options.verticalPosition} != center
-//    #{options.verticalPosition} margin
-//
-//  if #{options.horizontalPosition} != center
-//    #{options.horizontalPosition} margin
-
   // Misc styles.
 
   *, *:before, *:after
@@ -94,7 +87,6 @@ style: """
   position absolute
   transform-style preserve-3d
   -webkit-transform translate3d(0px, 0px, 0px)
-  -webkit-backface-visibility hidden
   mainDimension = 176px
   width auto
   min-width 200px
@@ -106,6 +98,14 @@ style: """
   border none
   -webkit-backdrop-filter blurProperties
   z-index 10
+
+  if #{options.enable3d} == true and #{options.verticalPosition} == bottom and #{options.horizontalPosition} == left
+    border-radius 0
+    transform rotatey(10deg)
+    -webkit-box-reflect below 0px linear-gradient(180deg, rgba(white, 0) 64px0%, rgba(white, 0.3) 100%)
+    box-shadow none
+    .art
+      border-radius 0 !important
 
   .wrapper
     font-size 8pt
@@ -238,6 +238,9 @@ afterRender: (domEl) ->
 
   meta = div.find('.text')
 
+  if @options.enable3d is true and @options.verticalPosition is 'bottom' and @options.horizontalPosition is 'left'
+    div.parents('#__uebersicht').css({'perspective': '200px', 'perspective-origin': '0% 90%'})
+
   if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)
 
@@ -257,70 +260,67 @@ update: (output, domEl) ->
   # Get our main DIV.
   div = $(domEl)
 
-  if @options.widgetEnable
-    if !output
-      div.animate({opacity: 0}, 250, 'swing').hide(1)
-    else
-      values = output.slice(0,-1).split(" @ ")
-      div.find('.artist').html(values[0])
-      div.find('.song').html(values[1])
-      div.find('.album').html(values[2])
-      tDuration = values[3]
-      tPosition = values[4]
-      tArtwork = values[5]
-      songChanged = values[6]
-      currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
-      tWidth = div.width()
-      tCurrent = (tPosition / tDuration) * tWidth
-      div.find('.progress').css width: tCurrent
-      # console.log(tArtwork + ", " + currArt)
-
-      # if @options.verticalPosition is 'center'
-      #   wrapHeight = div.find('.wrapper').height()
-      #   div.css('top', (screen.height - wrapHeight)/2)
-      # if @options.horizontalPosition is 'center'
-      #   wrapWidth = div.find('.wrapper').width()
-      #   div.css('left', (screen.width - wrapWidth)/2)
-      #
-      #
-      # div.closest('div').css('position', 'relative')
-
-      div.show(1).animate({opacity: 1}, 250, 'swing')
-
-      if currArt isnt tArtwork and tArtwork isnt 'NA'
-        artwork = div.find('.art')
-        artwork.css('background-image', 'url('+tArtwork+')')
-
-        # console.log("Changed to: " + tArtwork)
-
-        # Trying to fade the artwork on load, failing so far.
-        # if songChanged is 'true'
-          # artwork.fadeIn(100)
-          # artwork.
-          # artwork.fadeIn(500)
-
-        # artwork = div.find('.art')
-        # img = new Image
-        # img.onload = ->
-        #   artwork.css
-        #     'background-image': 'url(' + tArtwork + ')'
-        #     'background-size': 'contain'
-        #   artwork.fadeIn 300
-        #   return
-
-        # img.src = tArtwork
-        # return
-      else if tArtwork is 'NA'
-        artwork = div.find('.art')
-        artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
-
-      if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
-        div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
-
-    div.css('max-width', screen.width)
-
-    # Sort out flex-box positioning.
-    # div.parent('div').css('order', '9')
-    # div.parent('div').css('flex', '0 1 auto')
+  if !output
+    div.animate({opacity: 0}, 250, 'swing').hide(1)
   else
-    div.remove()
+    values = output.slice(0,-1).split(" @ ")
+    div.find('.artist').html(values[0])
+    div.find('.song').html(values[1])
+    div.find('.album').html(values[2])
+    tDuration = values[3]
+    tPosition = values[4]
+    tArtwork = values[5]
+    songChanged = values[6]
+    currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
+    tWidth = div.width()
+    tCurrent = (tPosition / tDuration) * tWidth
+    div.find('.progress').css width: tCurrent
+    # console.log(tArtwork + ", " + currArt)
+
+    # if @options.verticalPosition is 'center'
+    #   wrapHeight = div.find('.wrapper').height()
+    #   div.css('top', (screen.height - wrapHeight)/2)
+    # if @options.horizontalPosition is 'center'
+    #   wrapWidth = div.find('.wrapper').width()
+    #   div.css('left', (screen.width - wrapWidth)/2)
+    #
+    #
+    # div.closest('div').css('position', 'relative')
+
+    div.show(1).animate({opacity: 1}, 250, 'swing')
+
+    if currArt isnt tArtwork and tArtwork isnt 'NA'
+      artwork = div.find('.art')
+      artwork.css('background-image', 'url('+tArtwork+')')
+
+      # console.log("Changed to: " + tArtwork)
+
+      # Trying to fade the artwork on load, failing so far.
+      # if songChanged is 'true'
+        # artwork.fadeIn(100)
+        # artwork.
+        # artwork.fadeIn(500)
+
+      # artwork = div.find('.art')
+      # img = new Image
+      # img.onload = ->
+      #   artwork.css
+      #     'background-image': 'url(' + tArtwork + ')'
+      #     'background-size': 'contain'
+      #   artwork.fadeIn 300
+      #   return
+
+      # img.src = tArtwork
+      # return
+    else if tArtwork is 'NA'
+      artwork = div.find('.art')
+      artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+
+    if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
+      div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
+
+  div.css('max-width', screen.width)
+
+  # Sort out flex-box positioning.
+  # div.parent('div').css('order', '9')
+  # div.parent('div').css('flex', '0 1 auto')
