@@ -8,7 +8,7 @@ options =
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "medium"                # large | medium | small
+  widgetVariant: "large"                # large | medium | small
 
   # Do you want to enable a spiffy 3D look? It works only in bottom-left position.
   enable3d: false                        # true | false
@@ -155,6 +155,12 @@ style: """
   .album
     color fColor05
 
+  .heart
+    position absolute
+    color white
+    top 4px
+    #{options.horizontalPosition} @top
+    font-size 16px
 
   // Different styles for different widget sizes.
 
@@ -167,6 +173,9 @@ style: """
 
     .album
       display none
+
+    .heart
+      font-size 12px !important
   else
     Scale = 1
 
@@ -223,7 +232,7 @@ options : options
 render: () -> """
   <div class="wrapper">
     <div class="progress"></div>
-    <div class="art"></div>
+    <div class="art"><span class="heart">&#9829;</span></div>
     <div class="text">
       <div class="song"></div>
       <div class="artist"></div>
@@ -271,6 +280,7 @@ update: (output, domEl) ->
     tPosition = values[4]
     tArtwork = values[5]
     songChanged = values[6]
+    isLoved = values[7]
     currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
     tWidth = div.width()
     tCurrent = (tPosition / tDuration) * tWidth
@@ -318,6 +328,11 @@ update: (output, domEl) ->
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
+
+    if isLoved is 'true'
+      div.find('.heart').show()
+    else
+      div.find('.heart').hide()
 
   div.css('max-width', screen.width)
 

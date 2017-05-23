@@ -1,10 +1,5 @@
-use AppleScript version "2.4" -- Yosemite (10.10) or later
-use scripting additions
-
-global artistName, songName, albumName, songRating, songDuration, currentPosition, musicapp, apiKey, songMetaFile, mypath, currentCoverURL
-property blackStar : "â˜…"
-property whiteStar : "â˜†"
-set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged"}
+global artistName, songName, albumName, songRating, songDuration, currentPosition, musicapp, apiKey, songMetaFile, mypath, currentCoverURL, isLoved
+set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved"}
 property enableLogging : false --- options: true | false
 
 set apiKey to "2e8c49b69df3c1cf31aaa36b3ba1d166"
@@ -23,15 +18,16 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 if isMusicPlaying() is true then
 	getSongMeta()
-	â€”return grabCover()
+	--return grabCover()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
 	if didSongChange() is true then
 		delay 1
-		writeSongMeta({Â¬
-			"artistName" & "##" & artistName, Â¬
-			"songName" & "##" & songName, Â¬
-			"songDuration" & "##" & songDuration, Â¬
-			"songChanged" & "##" & Â¬
+		writeSongMeta({Â
+			"artistName" & "##" & artistName, Â
+			"songName" & "##" & songName, Â
+			"songDuration" & "##" & songDuration, Â
+			"isLoved" & "##" & isLoved, Â
+			"songChanged" & "##" & Â
 			true})
 		if didCoverChange() is true then
 			set savedCoverURL to my readSongMeta({"coverURL"})
@@ -40,15 +36,10 @@ if isMusicPlaying() is true then
 		end if
 		writeSongMeta({"albumName" & "##" & albumName})
 	else
-		writeSongMeta({"songChanged" & "##" & false})
+		writeSongMeta({Â
+			"songChanged" & "##" & false, Â
+			"isLoved" & "##" & isLoved})
 	end if
-	
-	if didCoverChange() is true then
-		set savedCoverURL to my readSongMeta({"coverURL"})
-		set currentCoverURL to grabCover()
-		if savedCoverURL is not currentCoverURL then writeSongMeta({"coverURL" & "##" & currentCoverURL})
-	end if
-	
 	spitOutput(metaToGrab) as string
 	
 else
@@ -89,6 +80,12 @@ on getSongMeta()
 			try
 				tell musicAppReference
 					set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
+					if musicapp is "iTunes" then
+						set isLoved to loved of current track as string
+					else if musicapp is "Spotify" then
+						set isLoved to "false"
+						set songDuration to my comma_delimit(songDuration)
+					end if
 					set currentPosition to my formatNum(player position as string)
 					set songDuration to my formatNum(songDuration as string)
 				end tell
@@ -120,7 +117,7 @@ on didCoverChange()
 		set currentSongMeta to artistName & albumName
 		set savedSongMeta to (readSongMeta({"artistName"}) & readSongMeta({"albumName"}) as string)
 		if currentSongMeta is not savedSongMeta then set answer to true
-		if readSongMeta({"coverURL"}) as string is "NA" then set answer to true
+		if readSongMeta({"coverURL"}) is "NA" then set answer to true
 	on error e
 		my logEvent(e)
 	end try
@@ -138,8 +135,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getSpotifyArt()
-			--my getLastfmArt()
+			my getLastfmArt()
 		end if
 	on error e
 		logEvent(e)
@@ -152,7 +148,7 @@ on getLocaliTunesArt()
 	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
 	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
-		if format is Â«class PNG Â» then -- figure out the proper file extension
+		if format is Çclass PNG È then -- figure out the proper file extension
 			set ext to ".png"
 		else
 			set ext to ".jpg"
@@ -200,46 +196,6 @@ on getLastfmArt()
 	end repeat
 end getLastfmArt
 
-on getSpotifyArt()
-	set coverDownloaded to false
-	set rawXML to ""
-	set currentCoverURL to "NA"
-	repeat 5 times
-		try
-			tell application "Spotify" to set trackID to id of current track
-			set AppleScript's text item delimiters to ":"
-			set trackID to last text item of trackID
-			set AppleScript's text item delimiters to ""
-		on error e
-			my logEvent(e)
-		end try
-		try
-			set rawXML to (do shell script "curl -X GET 'https://api.spotify.com/v1/tracks/" & trackID & "'")
-			delay 1
-		on error e
-			my logEvent(e & return & rawXML)
-		end try
-		if rawXML is not "" then
-			try
-				set AppleScript's text item delimiters to "\"url\" : \""
-				set processingXML to text item 2 of rawXML
-				set AppleScript's text item delimiters to "\","
-				set currentCoverURL to text item 1 of processingXML
-				set AppleScript's text item delimiters to ""
-				if currentCoverURL is "" then
-					my logEvent("Cover art unavailable." & return & rawXML)
-					set currentCoverURL to "NA"
-					set coverDownloaded to true
-				end if
-			on error e
-				my logEvent(e & return & rawXML)
-			end try
-			set coverDownloaded to true
-		end if
-		if coverDownloaded is true then exit repeat
-	end repeat
-end getSpotifyArt
-
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"
 	set countItems to count text items of aPath
@@ -273,7 +229,7 @@ on writeSongMeta(keys)
 			-- create an empty property list dictionary item
 			set the parent_dictionary to make new property list item with properties {kind:record}
 			-- create new property list file using the empty dictionary list item as contents
-			set this_plistfile to Â¬
+			set this_plistfile to Â
 				make new property list file with properties {contents:parent_dictionary, name:songMetaFile}
 		end if
 		try
@@ -282,7 +238,7 @@ on writeSongMeta(keys)
 				set keyName to text item 1 of aKey
 				set keyValue to text item 2 of aKey
 				set AppleScript's text item delimiters to ""
-				make new property list item at end of property list items of contents of property list file songMetaFile Â¬
+				make new property list item at end of property list items of contents of property list file songMetaFile Â
 					with properties {kind:string, name:keyName, value:keyValue}
 			end repeat
 		on error e
@@ -304,13 +260,14 @@ end spitOutput
 on formatNum(aNumber)
 	set delimiters to {",", "."}
 	repeat with aDelimiter in delimiters
-		if aNumber does not contain aDelimiter then
-			set outNumber to comma_delimit(aNumber)
-		else
-			set outNumber to aNumber
+		if aNumber contains aDelimiter then
+			set AppleScript's text item delimiters to aDelimiter
+			set outValue to text item 1 of aNumber
+			set AppleScript's text item delimiters to ""
+			return outValue
 		end if
 	end repeat
-	return outNumber
+	if aNumber does not contain delimiters then return aNumber
 end formatNum
 
 on comma_delimit(this_number)
@@ -335,7 +292,7 @@ on number_to_string(this_number)
 		set x to the offset of "." in this_number
 		set y to the offset of "+" in this_number
 		set z to the offset of "E" in this_number
-		set the decimal_adjust to characters (y - (length of this_number)) thru Â¬
+		set the decimal_adjust to characters (y - (length of this_number)) thru Â
 			-1 of this_number as string as number
 		if x is not 0 then
 			set the first_part to characters 1 thru (x - 1) of this_number as string
@@ -346,7 +303,7 @@ on number_to_string(this_number)
 		set the converted_number to the first_part
 		repeat with i from 1 to the decimal_adjust
 			try
-				set the converted_number to Â¬
+				set the converted_number to Â
 					the converted_number & character i of the second_part
 			on error
 				set the converted_number to the converted_number & "0"
