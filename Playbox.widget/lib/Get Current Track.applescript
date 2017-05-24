@@ -135,7 +135,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getLastfmArt()
+			my getSpotifyArt()
 		end if
 	on error e
 		logEvent(e)
@@ -195,6 +195,46 @@ on getLastfmArt()
 		if coverDownloaded is true then exit repeat
 	end repeat
 end getLastfmArt
+
+on getSpotifyArt()
+	set coverDownloaded to false
+	set rawXML to ""
+	set currentCoverURL to "NA"
+	repeat 5 times
+		try
+			tell application "Spotify" to set trackID to id of current track
+			set AppleScript's text item delimiters to ":"
+			set trackID to last text item of trackID
+			set AppleScript's text item delimiters to ""
+		on error e
+			my logEvent(e)
+		end try
+		try
+			set rawXML to (do shell script "curl -X GET 'https://api.spotify.com/v1/tracks/" & trackID & "'")
+			delay 1
+		on error e
+			my logEvent(e & return & rawXML)
+		end try
+		if rawXML is not "" then
+			try
+				set AppleScript's text item delimiters to "\"url\" : \""
+				set processingXML to text item 2 of rawXML
+				set AppleScript's text item delimiters to "\","
+				set currentCoverURL to text item 1 of processingXML
+				set AppleScript's text item delimiters to ""
+				if currentCoverURL is "" then
+					my logEvent("Cover art unavailable." & return & rawXML)
+					set currentCoverURL to "NA"
+					set coverDownloaded to true
+				end if
+			on error e
+				my logEvent(e & return & rawXML)
+			end try
+			set coverDownloaded to true
+		end if
+		if coverDownloaded is true then exit repeat
+	end repeat
+end getSpotifyArt
 
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"
