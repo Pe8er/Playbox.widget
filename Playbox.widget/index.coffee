@@ -302,24 +302,25 @@ update: (output, domEl) ->
     if currArt isnt tArtwork and tArtwork isnt 'NA'
       artwork = div.find('.art')
       # artwork.css('background-image', 'url('+tArtwork+')')
-      console.log("Changed to: " + tArtwork)
+      # console.log("Changed to: " + tArtwork)
 
       # Trying to fade the artwork on load, failing so far.
       if songChanged is 'true'
         console.log("song changed!")
-        artwork.fadeTo('slow', 0.3, () ->
+        artwork.fadeTo('slow', 0, () ->
           $(this).css('background-image', 'url(' + tArtwork + ')');
-        ).fadeTo('slow', 1)
+        ).delay(500).fadeTo('slow', 1)
 
-      console.log(artwork.css('background-image'))
-      if artwork.css('background-image').indexOf("url(lib/default.png)") and tArtwork isnt 'NA'
+      else if "lib/default.png".indexOf(artwork.css('background-image')) and tArtwork isnt 'NA' and artwork.css('background-image') isnt 'url(' + tArtwork + ')'
         artwork.css('background-image', 'url(' + tArtwork + ')');
 
 
 
     else if tArtwork is 'NA'
       artwork = div.find('.art')
-      artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+      artwork.fadeTo('slow', 0, () ->
+        $(this).css('background-image', 'url(/Playbox.widget/lib/default.png)');
+      ).delay(500).fadeTo('slow', 1)
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
