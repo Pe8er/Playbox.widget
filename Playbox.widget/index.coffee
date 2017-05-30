@@ -10,9 +10,6 @@ options =
   # Choose widget size.
   widgetVariant: "large"                # large | medium | small
 
-  # Do you want to enable a spiffy 3D look? It works only in bottom-left position.
-  enable3d: false                        # true | false
-
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
 
@@ -98,14 +95,6 @@ style: """
   border none
   -webkit-backdrop-filter blurProperties
   z-index 10
-
-  if #{options.enable3d} == true and #{options.verticalPosition} == bottom and #{options.horizontalPosition} == left
-    border-radius 0
-    transform rotatey(10deg)
-    -webkit-box-reflect below 0px linear-gradient(180deg, rgba(white, 0) 64px0%, rgba(white, 0.3) 100%)
-    box-shadow none
-    .art
-      border-radius 0 !important
 
   .wrapper
     font-size 8pt
@@ -246,9 +235,6 @@ afterRender: (domEl) ->
   div = $(domEl)
 
   meta = div.find('.text')
-
-  if @options.enable3d is true and @options.verticalPosition is 'bottom' and @options.horizontalPosition is 'left'
-    div.parents('#__uebersicht').css({'perspective': '200px', 'perspective-origin': '0% 90%'})
 
   if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)

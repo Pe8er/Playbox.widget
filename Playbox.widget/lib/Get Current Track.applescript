@@ -135,7 +135,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getSpotifyArt()
+			my getLastfmArt()
 		end if
 	on error e
 		logEvent(e)
