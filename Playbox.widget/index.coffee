@@ -8,7 +8,7 @@ options =
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "large"                # large | medium | small
+  widgetVariant: "small"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -125,7 +125,7 @@ style: """
   .progress
     width @width
     height 2px
-    background fColor1
+    background rgb(0, 181, 18)
     position absolute
     bottom 0
     left 0
@@ -256,7 +256,7 @@ update: (output, domEl) ->
   div = $(domEl)
 
   if !output
-    div.animate({opacity: 0}, 250, 'swing').hide(1)
+    div.slideUp().hide(1)
   else
     values = output.slice(0,-1).split(" @ ")
     div.find('.artist').html(values[0])
@@ -283,34 +283,30 @@ update: (output, domEl) ->
     #
     # div.closest('div').css('position', 'relative')
 
-    div.show(1).animate({opacity: 1}, 250, 'swing')
+    div.show("slow")
 
     if currArt isnt tArtwork and tArtwork isnt 'NA'
       artwork = div.find('.art')
-      artwork.css('background-image', 'url('+tArtwork+')')
-
+      # artwork.css('background-image', 'url('+tArtwork+')')
       # console.log("Changed to: " + tArtwork)
 
       # Trying to fade the artwork on load, failing so far.
-      # if songChanged is 'true'
-        # artwork.fadeIn(100)
-        # artwork.
-        # artwork.fadeIn(500)
+      if songChanged is 'true'
+        console.log("song changed!")
+        artwork.fadeTo('slow', 0, () ->
+          $(this).css('background-image', 'url(' + tArtwork + ')');
+        ).delay(500).fadeTo('slow', 1)
 
-      # artwork = div.find('.art')
-      # img = new Image
-      # img.onload = ->
-      #   artwork.css
-      #     'background-image': 'url(' + tArtwork + ')'
-      #     'background-size': 'contain'
-      #   artwork.fadeIn 300
-      #   return
+      else if "lib/default.png".indexOf(artwork.css('background-image')) and tArtwork isnt 'NA' and artwork.css('background-image') isnt 'url(' + tArtwork + ')'
+        artwork.css('background-image', 'url(' + tArtwork + ')');
 
-      # img.src = tArtwork
-      # return
+
+
     else if tArtwork is 'NA'
       artwork = div.find('.art')
-      artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+      artwork.fadeTo('slow', 0, () ->
+        $(this).css('background-image', 'url(/Playbox.widget/lib/default.png)');
+      ).delay(500).fadeTo('slow', 1)
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
