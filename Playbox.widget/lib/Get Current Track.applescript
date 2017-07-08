@@ -18,8 +18,8 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 if isMusicPlaying() is true then
 	getSongMeta()
-	--return grabCover()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
+	
 	if didSongChange() is true then
 		delay 1
 		writeSongMeta({Â
@@ -40,11 +40,11 @@ if isMusicPlaying() is true then
 			"songChanged" & "##" & false, Â
 			"isLoved" & "##" & isLoved})
 	end if
-	spitOutput(metaToGrab) as string
-	
 else
 	return
 end if
+
+spitOutput(metaToGrab) as string
 
 ------------------------------------------------
 ---------------SUBROUTINES GALORE---------------
@@ -196,46 +196,6 @@ on getLastfmArt()
 	end repeat
 end getLastfmArt
 
-on getSpotifyArt()
-	set coverDownloaded to false
-	set rawXML to ""
-	set currentCoverURL to "NA"
-	repeat 5 times
-		try
-			tell application "Spotify" to set trackID to id of current track
-			set AppleScript's text item delimiters to ":"
-			set trackID to last text item of trackID
-			set AppleScript's text item delimiters to ""
-		on error e
-			my logEvent(e)
-		end try
-		try
-			set rawXML to (do shell script "curl -X GET 'https://api.spotify.com/v1/tracks/" & trackID & "'")
-			delay 1
-		on error e
-			my logEvent(e & return & rawXML)
-		end try
-		if rawXML is not "" then
-			try
-				set AppleScript's text item delimiters to "\"url\" : \""
-				set processingXML to text item 2 of rawXML
-				set AppleScript's text item delimiters to "\","
-				set currentCoverURL to text item 1 of processingXML
-				set AppleScript's text item delimiters to ""
-				if currentCoverURL is "" then
-					my logEvent("Cover art unavailable." & return & rawXML)
-					set currentCoverURL to "NA"
-					set coverDownloaded to true
-				end if
-			on error e
-				my logEvent(e & return & rawXML)
-			end try
-			set coverDownloaded to true
-		end if
-		if coverDownloaded is true then exit repeat
-	end repeat
-end getSpotifyArt
-
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"
 	set countItems to count text items of aPath
@@ -293,7 +253,6 @@ on spitOutput(metaToGrab)
 		set valuesList to valuesList & readSongMeta({metaPiece}) & " @ "
 	end repeat
 	set output to items 1 thru -2 of valuesList
-	--logEvent(output)
 	return output
 end spitOutput
 

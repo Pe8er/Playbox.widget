@@ -24,7 +24,6 @@ refreshFrequency: '1s'
 
 style: """
 
-
   // Let's do theming first.
 
   if #{options.widgetTheme} == dark
@@ -35,7 +34,6 @@ style: """
     fColor = black
     bgColor = white
     bgBrightness = 120%
-
 
   // Specify color palette and blur properties.
 
@@ -236,6 +234,11 @@ afterRender: (domEl) ->
 
   meta = div.find('.text')
 
+  if @options.verticalPosition is 'center'
+    div.css('top', (screen.height - div.height())/2)
+  if @options.horizontalPosition is 'center'
+    div.css('left', (screen.width - div.width())/2)
+
   if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)
 
@@ -272,16 +275,6 @@ update: (output, domEl) ->
     tCurrent = (tPosition / tDuration) * tWidth
     div.find('.progress').css width: tCurrent
     # console.log(tArtwork + ", " + currArt)
-
-    # if @options.verticalPosition is 'center'
-    #   wrapHeight = div.find('.wrapper').height()
-    #   div.css('top', (screen.height - wrapHeight)/2)
-    # if @options.horizontalPosition is 'center'
-    #   wrapWidth = div.find('.wrapper').width()
-    #   div.css('left', (screen.width - wrapWidth)/2)
-    #
-    #
-    # div.closest('div').css('position', 'relative')
 
     div.show(1).animate({opacity: 1}, 250, 'swing')
 
