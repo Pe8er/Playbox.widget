@@ -11,11 +11,10 @@
 
     window.originThis.run(accessTokenCommand, (errA, outputA) => {
         var result = $.parseJSON(outputA);
-
-        var requestCommand = `curl -H "Authorization: Bearer ${result.access_token}" "https://api.spotify.com/v1/tracks/${spotifyID}"`
-
+        
+        var requestCommand = `curl -s -H "Authorization: Bearer ${result.access_token}" "https://api.spotify.com/v1/tracks/${spotifyID}"`
         window.originThis.run(requestCommand, (errR, outputR) => {
-            var json = $.parseJSON("{" + outputR.substr(outputR.indexOf("{") + 1));
+            var json = $.parseJSON(outputR);
             
             var album = json.album;
             var images = album.images;
