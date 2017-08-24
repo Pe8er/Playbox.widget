@@ -1,6 +1,6 @@
 'use strict';
 (function () {
-    var spotifyID = window.trackID;
+    var spotifyID = localStorage.getItem('trackID');
     var artwork = window.artworkTE;
 
     var CLIENT_ID = "42710d8b10584c3ca8b1df0cd5a14a63";
