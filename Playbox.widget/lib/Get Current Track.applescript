@@ -155,7 +155,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getLastfmArt()
+			set currentCoverURL to "NA"
 		end if
 	on error e
 		logEvent(e)
