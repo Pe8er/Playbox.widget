@@ -278,8 +278,8 @@ update: (output, domEl) ->
 
     div.show(1).animate({opacity: 1}, 250, 'swing')
 
-    if values[8] isnt 'NA'
-        window.trackID = values[8]
+    if values[8] isnt 'NA' and localStorage.getItem('trackID') isnt values[8]
+        localStorage.setItem('trackID', values[8])
         window.originThis = @
         window.artworkTE = div.find('.art')
         $.getScript "Playbox.widget/lib/spotify.js"
