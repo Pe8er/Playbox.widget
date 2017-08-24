@@ -4,11 +4,11 @@
 
 options =
   # Choose where the widget should sit on your screen.
-  verticalPosition    : "center"        # top | bottom | center
-  horizontalPosition    : "right"        # left | right | center
+  verticalPosition    : "bottom"        # top | bottom | center
+  horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "small"                # large | medium | small
+  widgetVariant: "large"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -63,7 +63,7 @@ style: """
       border-radius 6px
 
   if #{options.verticalPosition} == center
-    top 77%
+    top 50%
     transform translateY(-50%)
   else
     #{options.verticalPosition} margin
@@ -234,8 +234,8 @@ afterRender: (domEl) ->
 
   meta = div.find('.text')
 
-  #if @options.verticalPosition is 'center'
-  #  div.css('top', (screen.height - div.height())/2)
+  if @options.verticalPosition is 'center'
+    div.css('top', (screen.height - div.height())/2)
   if @options.horizontalPosition is 'center'
     div.css('left', (screen.width - div.width())/2)
 
