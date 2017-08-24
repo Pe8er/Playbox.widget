@@ -93,6 +93,8 @@ style: """
   border none
   -webkit-backdrop-filter blurProperties
   z-index 10
+  user-select: none
+  cursor: default
 
   .wrapper
     font-size 8pt
@@ -250,6 +252,7 @@ afterRender: (domEl) ->
           div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 300, 'swing')
           # div.find('.wrapper').stop(true,true).addClass('pushed')
           # div.find('.wrapper').stop(true,true).removeClass('pushed')
+          $.getScript "Playbox.widget/lib/spotify.js"
     )
 
 # Update the rendered output.
