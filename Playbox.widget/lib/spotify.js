@@ -19,7 +19,7 @@
             
             var album = json.album;
             var images = album.images;
-            var albumArtwork = images[0].url;
+            var albumArtwork = images[2].url;
             artwork.css('background-image', 'url(' + albumArtwork + ')');
         });
     });
