@@ -1,6 +1,8 @@
 global artistName, songName, albumName, songRating, songDuration, currentPosition, musicapp, apiKey, songMetaFile, mypath, currentCoverURL, isLoved
-set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved"}
+set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved", "trackID"}
 property enableLogging : false --- options: true | false
+
+set trackID to "NA"
 
 set apiKey to "2e8c49b69df3c1cf31aaa36b3ba1d166"
 try
@@ -40,6 +42,9 @@ if isMusicPlaying() is true then
 			"songChanged" & "##" & false, Â
 			"isLoved" & "##" & isLoved})
 	end if
+	
+	writeSongMeta({Â
+		"trackID" & "##" & getID()})
 else
 	return
 end if
@@ -123,6 +128,21 @@ on didCoverChange()
 	end try
 	return answer
 end didCoverChange
+
+on getID()
+	repeat 5 times
+		try
+			tell application "Spotify" to set trackID to id of current track
+			set AppleScript's text item delimiters to ":"
+			set trackID to last text item of trackID
+			set AppleScript's text item delimiters to ""
+		on error e
+			my logEvent(e)
+			set trackID to "NA"
+		end try
+	end repeat
+	return trackID
+end getID
 
 on grabCover()
 	try

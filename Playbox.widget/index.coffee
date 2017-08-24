@@ -4,11 +4,11 @@
 
 options =
   # Choose where the widget should sit on your screen.
-  verticalPosition    : "bottom"        # top | bottom | center
-  horizontalPosition    : "left"        # left | right | center
+  verticalPosition    : "center"        # top | bottom | center
+  horizontalPosition    : "right"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "large"                # large | medium | small
+  widgetVariant: "small"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -63,7 +63,7 @@ style: """
       border-radius 6px
 
   if #{options.verticalPosition} == center
-    top 50%
+    top 77%
     transform translateY(-50%)
   else
     #{options.verticalPosition} margin
@@ -234,8 +234,8 @@ afterRender: (domEl) ->
 
   meta = div.find('.text')
 
-  if @options.verticalPosition is 'center'
-    div.css('top', (screen.height - div.height())/2)
+  #if @options.verticalPosition is 'center'
+  #  div.css('top', (screen.height - div.height())/2)
   if @options.horizontalPosition is 'center'
     div.css('left', (screen.width - div.width())/2)
 
@@ -278,32 +278,14 @@ update: (output, domEl) ->
 
     div.show(1).animate({opacity: 1}, 250, 'swing')
 
-    if currArt isnt tArtwork and tArtwork isnt 'NA'
-      artwork = div.find('.art')
-      artwork.css('background-image', 'url('+tArtwork+')')
-
-      # console.log("Changed to: " + tArtwork)
-
-      # Trying to fade the artwork on load, failing so far.
-      # if songChanged is 'true'
-        # artwork.fadeIn(100)
-        # artwork.
-        # artwork.fadeIn(500)
-
-      # artwork = div.find('.art')
-      # img = new Image
-      # img.onload = ->
-      #   artwork.css
-      #     'background-image': 'url(' + tArtwork + ')'
-      #     'background-size': 'contain'
-      #   artwork.fadeIn 300
-      #   return
-
-      # img.src = tArtwork
-      # return
-    else if tArtwork is 'NA'
-      artwork = div.find('.art')
-      artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+    if values[8] isnt 'NA'
+        window.trackID = values[8]
+        window.originThis = @
+        window.artworkTE = div.find('.art')
+        $.getScript "Playbox.widget/lib/spotify.js"
+      else
+        artwork = div.find('.art')
+        artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
