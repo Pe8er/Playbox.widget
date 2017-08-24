@@ -284,8 +284,12 @@ update: (output, domEl) ->
         window.artworkTE = div.find('.art')
         $.getScript "Playbox.widget/lib/spotify.js"
       else
-        artwork = div.find('.art')
-        artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+        if currArt isnt tArtwork and tArtwork isnt 'NA'
+          artwork = div.find('.art')
+          artwork.css('background-image', 'url('+tArtwork+')')
+        else
+          artwork = div.find('.art')
+          artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
