@@ -263,7 +263,11 @@ update: (output, domEl) ->
 
   if !output
     div.animate({opacity: 0}, 250, 'swing').hide(1)
+    localStorage.setItem("state", "paused")
   else
+      if localStorage.getItem("state") is "paused"
+        localStorage.setItem("state", "playing")
+        $.getScript "Playbox.widget/lib/spotify.js"
     values = output.slice(0,-1).split(" @ ")
     div.find('.artist').html(values[0])
     div.find('.song').html(values[1])
@@ -285,8 +289,8 @@ update: (output, domEl) ->
         window.originThis = @
         window.artworkTE = div.find('.art')
         if localStorage.getItem('trackID') isnt values[8]
-          $.getScript "Playbox.widget/lib/spotify.js"
           localStorage.setItem('trackID', values[8])
+          $.getScript "Playbox.widget/lib/spotify.js"
       else
         if currArt isnt tArtwork and tArtwork isnt 'NA'
           artwork = div.find('.art')
