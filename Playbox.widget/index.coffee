@@ -93,6 +93,8 @@ style: """
   border none
   -webkit-backdrop-filter blurProperties
   z-index 10
+  user-select: none
+  cursor: default
 
   .wrapper
     font-size 8pt
@@ -250,6 +252,7 @@ afterRender: (domEl) ->
           div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 300, 'swing')
           # div.find('.wrapper').stop(true,true).addClass('pushed')
           # div.find('.wrapper').stop(true,true).removeClass('pushed')
+          $.getScript "Playbox.widget/lib/spotify.js"
     )
 
 # Update the rendered output.
@@ -260,7 +263,11 @@ update: (output, domEl) ->
 
   if !output
     div.animate({opacity: 0}, 250, 'swing').hide(1)
+    localStorage.setItem("state", "paused")
   else
+      if localStorage.getItem("state") is "paused"
+        localStorage.setItem("state", "playing")
+        $.getScript "Playbox.widget/lib/spotify.js"
     values = output.slice(0,-1).split(" @ ")
     div.find('.artist').html(values[0])
     div.find('.song').html(values[1])
@@ -278,32 +285,19 @@ update: (output, domEl) ->
 
     div.show(1).animate({opacity: 1}, 250, 'swing')
 
-    if currArt isnt tArtwork and tArtwork isnt 'NA'
-      artwork = div.find('.art')
-      artwork.css('background-image', 'url('+tArtwork+')')
-
-      # console.log("Changed to: " + tArtwork)
-
-      # Trying to fade the artwork on load, failing so far.
-      # if songChanged is 'true'
-        # artwork.fadeIn(100)
-        # artwork.
-        # artwork.fadeIn(500)
-
-      # artwork = div.find('.art')
-      # img = new Image
-      # img.onload = ->
-      #   artwork.css
-      #     'background-image': 'url(' + tArtwork + ')'
-      #     'background-size': 'contain'
-      #   artwork.fadeIn 300
-      #   return
-
-      # img.src = tArtwork
-      # return
-    else if tArtwork is 'NA'
-      artwork = div.find('.art')
-      artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
+    if values[8] isnt 'NA'
+        window.originThis = @
+        window.artworkTE = div.find('.art')
+        if localStorage.getItem('trackID') isnt values[8]
+          localStorage.setItem('trackID', values[8])
+          $.getScript "Playbox.widget/lib/spotify.js"
+      else
+        if currArt isnt tArtwork and tArtwork isnt 'NA'
+          artwork = div.find('.art')
+          artwork.css('background-image', 'url('+tArtwork+')')
+        else
+          artwork = div.find('.art')
+          artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
 
     if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
