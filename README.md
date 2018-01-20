@@ -1,6 +1,6 @@
 # Playbox for [Übersicht](http://tracesof.net/uebersicht/)
 
-This widget shows currently played song in either iTunes or Spotify. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and has a ton of customization options.
+This widget shows currently played song in iTunes, Spotify or Swinsian. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and has a ton of customization options.
 
 ## [Download Playbox](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
 
@@ -8,8 +8,8 @@ This widget shows currently played song in either iTunes or Spotify. It has a sp
 
 <img src="https://github.com/Pe8er/Playbox.widget/blob/master/screenshot.jpg" width="516" height="320">
 
-- Supports both Spotify and iTunes.
-- Shows artwork (courtesy of [last.fm](http://www.last.fm) or local artwork for iTunes songs).
+- Supports Spotify, iTunes and Swinsian.
+- Shows artwork (courtesy of [last.fm](http://www.last.fm) or local artwork for iTunes/Swinsian songs).
 - Song progress bar.
 - Three size variants.
 - 🔥 Dark and light themes.
