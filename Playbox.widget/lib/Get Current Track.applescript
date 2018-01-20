@@ -22,12 +22,12 @@ if isMusicPlaying() is true then
 	
 	if didSongChange() is true then
 		delay 1
-		writeSongMeta({Â
-			"artistName" & "##" & artistName, Â
-			"songName" & "##" & songName, Â
-			"songDuration" & "##" & songDuration, Â
-			"isLoved" & "##" & isLoved, Â
-			"songChanged" & "##" & Â
+		writeSongMeta({ï¿½
+			"artistName" & "##" & artistName, ï¿½
+			"songName" & "##" & songName, ï¿½
+			"songDuration" & "##" & songDuration, ï¿½
+			"isLoved" & "##" & isLoved, ï¿½
+			"songChanged" & "##" & ï¿½
 			true})
 		if didCoverChange() is true then
 			set savedCoverURL to my readSongMeta({"coverURL"})
@@ -36,8 +36,8 @@ if isMusicPlaying() is true then
 		end if
 		writeSongMeta({"albumName" & "##" & albumName})
 	else
-		writeSongMeta({Â
-			"songChanged" & "##" & false, Â
+		writeSongMeta({ï¿½
+			"songChanged" & "##" & false, ï¿½
 			"isLoved" & "##" & isLoved})
 	end if
 else
@@ -51,20 +51,32 @@ spitOutput(metaToGrab) as string
 ------------------------------------------------
 
 on isMusicPlaying()
-	set apps to {"iTunes", "Spotify"}
+	set apps to {"Swinsian", "iTunes", "Spotify"}
 	set answer to false
 	repeat with anApp in apps
 		tell application "System Events" to set isRunning to (name of processes) contains anApp
 		if isRunning is true then
 			try
-				using terms from application "iTunes"
+				if (anApp as string) is "Swinsian" then
 					tell application anApp
-						if player state is playing then
-							set musicapp to (anApp as string)
-							set answer to true
-						end if
+						using terms from application "Swinsian"
+							if player state is playing then
+								set musicapp to (anApp as string)
+								set answer to true
+							end if
+						end using terms from
 					end tell
-				end using terms from
+				else
+					using terms from application "iTunes"
+						tell application anApp
+							if player state is playing then
+								set musicapp to (anApp as string)
+								set answer to true
+							end if
+						end tell
+					end using terms from
+				end if
+				
 			on error e
 				my logEvent(e)
 			end try
@@ -76,23 +88,38 @@ end isMusicPlaying
 on getSongMeta()
 	try
 		set musicAppReference to a reference to application musicapp
-		using terms from application "iTunes"
-			try
-				tell musicAppReference
-					set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
-					if musicapp is "iTunes" then
-						set isLoved to loved of current track as string
-					else if musicapp is "Spotify" then
+		if musicapp is "Swinsian" then
+			using terms from application "Swinsian"
+				try
+					tell musicAppReference
+						set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
+						set currentPosition to my formatNum(player position as string)
+						set songDuration to my formatNum(songDuration as string)
 						set isLoved to "false"
-						set songDuration to my comma_delimit(songDuration)
-					end if
-					set currentPosition to my formatNum(player position as string)
-					set songDuration to my formatNum(songDuration as string)
-				end tell
-			on error e
-				my logEvent(e)
-			end try
-		end using terms from
+					end tell
+				on error e
+					my logEvent(e)
+				end try
+			end using terms from
+		else
+			using terms from application "iTunes"
+				try
+					tell musicAppReference
+						set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
+						if musicapp is "iTunes" then
+							set isLoved to loved of current track as string
+						else if musicapp is "Spotify" then
+							set isLoved to "false"
+							set songDuration to my comma_delimit(songDuration)
+						end if
+						set currentPosition to my formatNum(player position as string)
+						set songDuration to my formatNum(songDuration as string)
+					end tell
+				on error e
+					my logEvent(e)
+				end try
+			end using terms from
+		end if
 	on error e
 		my logEvent(e)
 	end try
@@ -136,6 +163,8 @@ on grabCover()
 			end tell
 		else if musicapp is "Spotify" then
 			my getLastfmArt()
+		else if musicapp is "Swinsian" then
+			my getSwinsianArt()
 		end if
 	on error e
 		logEvent(e)
@@ -144,11 +173,27 @@ on grabCover()
 	return currentCoverURL
 end grabCover
 
+on getSwinsianArt()
+	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
+	tell application "Swinsian"
+		set srcBytes to (album art of current track) -- get the raw bytes of the artwork into a var
+		set ext to ".png"
+	end tell
+	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 999) & ext as string -- get the filename to ~/my path/cover.ext
+	set outFile to open for access file fileName with write permission -- write to file
+	set eof outFile to 0 -- truncate the file
+	write srcBytes to outFile -- write the image bytes to the file
+	close access outFile
+	set currentCoverURL to POSIX path of fileName
+	writeSongMeta({"oldFilename" & "##" & currentCoverURL})
+	set currentCoverURL to getPathItem(currentCoverURL)
+end getSwinsianArt
+
 on getLocaliTunesArt()
 	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
 	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
-		if format is Çclass PNG È then -- figure out the proper file extension
+		if format is ï¿½class PNG ï¿½ then -- figure out the proper file extension
 			set ext to ".png"
 		else
 			set ext to ".jpg"
@@ -229,7 +274,7 @@ on writeSongMeta(keys)
 			-- create an empty property list dictionary item
 			set the parent_dictionary to make new property list item with properties {kind:record}
 			-- create new property list file using the empty dictionary list item as contents
-			set this_plistfile to Â
+			set this_plistfile to ï¿½
 				make new property list file with properties {contents:parent_dictionary, name:songMetaFile}
 		end if
 		try
@@ -238,7 +283,7 @@ on writeSongMeta(keys)
 				set keyName to text item 1 of aKey
 				set keyValue to text item 2 of aKey
 				set AppleScript's text item delimiters to ""
-				make new property list item at end of property list items of contents of property list file songMetaFile Â
+				make new property list item at end of property list items of contents of property list file songMetaFile ï¿½
 					with properties {kind:string, name:keyName, value:keyValue}
 			end repeat
 		on error e
@@ -291,7 +336,7 @@ on number_to_string(this_number)
 		set x to the offset of "." in this_number
 		set y to the offset of "+" in this_number
 		set z to the offset of "E" in this_number
-		set the decimal_adjust to characters (y - (length of this_number)) thru Â
+		set the decimal_adjust to characters (y - (length of this_number)) thru ï¿½
 			-1 of this_number as string as number
 		if x is not 0 then
 			set the first_part to characters 1 thru (x - 1) of this_number as string
@@ -302,7 +347,7 @@ on number_to_string(this_number)
 		set the converted_number to the first_part
 		repeat with i from 1 to the decimal_adjust
 			try
-				set the converted_number to Â
+				set the converted_number to ï¿½
 					the converted_number & character i of the second_part
 			on error
 				set the converted_number to the converted_number & "0"
