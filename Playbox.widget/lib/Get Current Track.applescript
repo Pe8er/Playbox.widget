@@ -172,8 +172,12 @@ on grabCover()
 	return currentCoverURL
 end grabCover
 
+on removeOldCover()
+	do shell script "rm -rf \"" & readSongMeta({"oldFilename"}) & "\"" -- delete old artwork
+end removeOldCover
+
 on getSwinsianArt()
-	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
+	my removeOldCover()
 	tell application "Swinsian"
 		set srcBytes to (album art of current track) -- get the raw bytes of the artwork into a var
 		set ext to ".png"
@@ -189,7 +193,7 @@ on getSwinsianArt()
 end getSwinsianArt
 
 on getLocaliTunesArt()
-	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
+	my removeOldCover()
 	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
 		if format is Çclass PNG È then -- figure out the proper file extension
