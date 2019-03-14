@@ -154,7 +154,7 @@ on getLocaliTunesArt()
 			set ext to ".jpg"
 		end if
 	end tell
-	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 999) & ext as string -- get the filename to ~/my path/cover.ext
+	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 9) & ext as string -- get the filename to ~/my path/cover.ext
 	set outFile to open for access file fileName with write permission -- write to file
 	set eof outFile to 0 -- truncate the file
 	write srcBytes to outFile -- write the image bytes to the file
