@@ -16,8 +16,11 @@ options =
   # Song metadata inside or outside? Applies to large and medium variants only.
   metaPosition: "inside"                # inside | outside
 
-  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room
   stickInCorner: false                  # true | false
+
+  # Use drop shadow?
+  useShadow: true                       # true | false
 
 command: "osascript 'Playbox.widget/lib/Get Current Track.applescript'"
 refreshFrequency: '1s'
@@ -51,12 +54,15 @@ style: """
 
   if #{options.stickInCorner} == false
     margin = 20px
-    box-shadow 0 20px 40px 0px rgba(0,0,0,.6)
     border-radius 6px
     .text
       border-radius 0 0 6px 6px
   else
     margin = 0
+
+  if #{options.useShadow} == true
+    box-shadow 0 20px 40px 0px rgba(0,0,0,.6)
+
 
   if #{options.stickInCorner} == false and #{options.widgetVariant} != small
     .art
