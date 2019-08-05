@@ -9,7 +9,7 @@ This widget shows currently played song in either iTunes or Spotify. It has a sp
 <img src="https://github.com/Pe8er/Playbox.widget/blob/master/screenshot.jpg" width="516" height="320">
 
 - Supports both Spotify and iTunes.
-- Shows artwork (courtesy of [last.fm](http://www.last.fm) or local artwork for iTunes songs or Spotify API.
+- Shows artwork (courtesy of [last.fm](http://www.last.fm) or local artwork for iTunes songs or Spotify API.)
 - Progress bar.
 - Three sizes.
 - 🔥 Dark and light themes.
