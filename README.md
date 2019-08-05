@@ -2,7 +2,7 @@
 
 This widget shows currently played song in either iTunes or Spotify. It has a spiffy progress bar, shows pretty artwork (external dependency: pretty artwork) and has a ton of customization options.
 
-## [Download Playbox](https://github.com/Pe8er/Playbox.widget/raw/master/Playbox.widget.zip)
+## [Download Playbox](https://github.com/Pe8er/Playbox.widget/releases/latest)
 
 # Features
 
