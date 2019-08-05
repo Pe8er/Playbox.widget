@@ -17,6 +17,7 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 
 if isMusicPlaying() is true then
+	my pruneCovers()
 	getSongMeta()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
 	
@@ -135,7 +136,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getLastfmArt()
+			my getSpotifyArt()
 		end if
 	on error e
 		logEvent(e)
@@ -145,7 +146,6 @@ on grabCover()
 end grabCover
 
 on getLocaliTunesArt()
-	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
 	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
 		if format is Çclass PNG È then -- figure out the proper file extension
@@ -164,37 +164,50 @@ on getLocaliTunesArt()
 	set currentCoverURL to getPathItem(currentCoverURL)
 end getLocaliTunesArt
 
-on getLastfmArt()
-	set coverDownloaded to false
-	set rawXML to ""
-	set currentCoverURL to "NA"
-	repeat 5 times
-		try
-			set rawXML to (do shell script "curl 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=" & quoted form of (my encodeText(artistName, true, false, 1)) & "&album=" & quoted form of (my encodeText(albumName, true, false, 1)) & "&api_key=" & apiKey & "'")
-			delay 1
-		on error e
-			my logEvent(e & return & rawXML)
-		end try
-		if rawXML is not "" then
-			try
-				set AppleScript's text item delimiters to "extralarge\">"
-				set processingXML to text item 2 of rawXML
-				set AppleScript's text item delimiters to "</image>"
-				set currentCoverURL to text item 1 of processingXML
-				set AppleScript's text item delimiters to ""
-				if currentCoverURL is "" then
-					my logEvent("Cover art unavailable." & return & rawXML)
-					set currentCoverURL to "NA"
-					set coverDownloaded to true
-				end if
+on getSpotifyArt()
+	try
+		tell application "Spotify" to set currentCoverURL to artwork url of current track
+	on error e
+		my logEvent(e)
+		set coverDownloaded to false
+		set rawXML to ""
+		set currentCoverURL to "NA"
+		repeat 5 times
+			try				
+				set rawXML to (do shell script "curl 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=" & my textReplace(artistName, space, "+") & "&album=" & my textReplace(albumName, space, "+") & "&api_key=" & apiKey & "'")
+				delay 1
 			on error e
 				my logEvent(e & return & rawXML)
 			end try
-			set coverDownloaded to true
-		end if
-		if coverDownloaded is true then exit repeat
-	end repeat
-end getLastfmArt
+			if rawXML is not "" then
+				try
+					set AppleScript's text item delimiters to "extralarge\">"
+					set processingXML to text item 2 of rawXML
+					set AppleScript's text item delimiters to "</image>"
+					set currentCoverURL to text item 1 of processingXML
+					set AppleScript's text item delimiters to ""
+					if currentCoverURL is "" then
+						my logEvent("Cover art unavailable." & return & rawXML)
+						set currentCoverURL to "NA"
+						set coverDownloaded to true
+					end if
+				on error e
+					my logEvent(e & return & rawXML)
+				end try
+				set coverDownloaded to true
+			end if
+			if coverDownloaded is true then exit repeat
+		end repeat
+	end try
+end getSpotifyArt
+
+on pruneCovers()
+	try
+		do shell script "rm '" & readSongMeta({"oldFilename"}) & "'"
+	on error e
+		my logEvent(e)
+	end try
+end pruneCovers
 
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"
@@ -314,6 +327,15 @@ on number_to_string(this_number)
 	end if
 end number_to_string
 
+on textReplace(sourceText, searchText, replaceText)
+	set {TID, AppleScript's text item delimiters} to {AppleScript's text item delimiters, searchText}
+	set textItems to every text item of sourceText
+	set AppleScript's text item delimiters to replaceText
+	set changedText to textItems as string
+	set AppleScript's text item delimiters to TID
+	return changedText
+end textReplace
+
 on encodeText(this_text, encode_URL_A, encode_URL_B, method)
 	--http://www.macosxautomation.com/applescript/sbrt/sbrt-08.html
 	set the standard_characters to "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -357,8 +379,7 @@ end checkFile
 on logEvent(e)
 	if enableLogging is true then
 		set e to e as string
-		tell application "Finder" to set myName to (name of file (path to me))
-		do shell script "echo '" & (current date) & space & quoted form of e & "' >> ~/Library/Logs/" & quoted form of myName & ".log"
+		do shell script "echo '" & (current date) & space & e & "' >> ~/Library/Logs/CurrentTrack.log"
 	else
 		return
 	end if

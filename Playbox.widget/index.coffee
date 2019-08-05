@@ -8,7 +8,7 @@ options =
   horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetVariant: "large"                # large | medium | small
+  widgetVariant: "medium"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
@@ -19,7 +19,7 @@ options =
   # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false                  # true | false
 
-command: "osascript 'Playbox.widget/lib/Get Current Track.applescript'"
+command: "osascript 'Playbox.widget/lib/get current track.applescript'"
 refreshFrequency: '1s'
 
 style: """
@@ -45,7 +45,7 @@ style: """
   bgColor08 = rgba(bgColor,0.7)
   bgColor05 = rgba(bgColor,0.5)
   bgColor02 = rgba(bgColor,0.2)
-  blurProperties = blur(10px) brightness(bgBrightness) contrast(100%) saturate(140%)
+  blurProperties = blur(20px) brightness(bgBrightness) contrast(100%) saturate(140%)
 
   // Next, let's sort out positioning.
 
@@ -83,9 +83,7 @@ style: """
   transform-style preserve-3d
   -webkit-transform translate3d(0px, 0px, 0px)
   mainDimension = 176px
-  width auto
-  min-width 200px
-  max-width mainDimension
+  width @mainDimension
   overflow hidden
   white-space nowrap
   background-color bgColor02
@@ -201,17 +199,17 @@ style: """
         overflow hidden
 
       .text
-        // Blurred background is turned off because of insane WebKit glitches :(
-        //-webkit-backdrop-filter blurProperties
+        -webkit-backdrop-filter blurProperties
         position absolute
         bottom 0
         left 0
         margin 0
-        padding 8px
         color fColor1
         background-color bgColor08
         width mainDimension * Scale
         max-width @width
+        padding 8px
+        border-radius 0 0 5px 5px
 """
 
 options : options
@@ -242,14 +240,13 @@ afterRender: (domEl) ->
   if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)
 
-    div.click(
-      =>
-        meta.stop(true,false).fadeIn(250).delay(3000).fadeOut(500)
-        if @options.stickInCorner is false
-          div.stop(true,true).animate({zoom: '0.99', boxShadow: '0 0 2px rgba(0,0,0,1.0)'}, 200, 'swing')
-          div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 300, 'swing')
-          # div.find('.wrapper').stop(true,true).addClass('pushed')
-          # div.find('.wrapper').stop(true,true).removeClass('pushed')
+    div.on 'click', =>
+      (
+        meta.fadeIn(250).delay(3000).fadeOut(500)
+        # if @options.stickInCorner is false
+        #   div.stop(true,true).animate({zoom: '0.9', boxShadow: '0 0 2px rgba(0,0,0,1.0)'}, 300, 'swing')
+        #   div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 500, 'swing')
+        # Update
     )
 
 # Update the rendered output.
