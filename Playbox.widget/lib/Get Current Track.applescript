@@ -84,7 +84,11 @@ on getSongMeta()
 					if musicapp is "iTunes" then
 						set isLoved to loved of current track as string
 					else if musicapp is "Spotify" then
-						set isLoved to "false"
+						try
+							set isLoved to starred of current track as string
+						on error
+							set isLoved to "false"
+						end try
 						set songDuration to my comma_delimit(songDuration)
 					end if
 					set currentPosition to my formatNum(player position as string)
@@ -173,7 +177,7 @@ on getSpotifyArt()
 		set rawXML to ""
 		set currentCoverURL to "NA"
 		repeat 5 times
-			try				
+			try
 				set rawXML to (do shell script "curl 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=" & my textReplace(artistName, space, "+") & "&album=" & my textReplace(albumName, space, "+") & "&api_key=" & apiKey & "'")
 				delay 1
 			on error e
