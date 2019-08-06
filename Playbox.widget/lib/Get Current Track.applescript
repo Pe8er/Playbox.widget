@@ -1,5 +1,5 @@
 global artistName, songName, albumName, songRating, songDuration, currentPosition, musicapp, apiKey, songMetaFile, mypath, currentCoverURL, isLoved
-set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved"}
+set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved", "darkMode"}
 property enableLogging : false --- options: true | false
 
 set apiKey to "2e8c49b69df3c1cf31aaa36b3ba1d166"
@@ -17,9 +17,10 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 
 if isMusicPlaying() is true then
-	my pruneCovers()
+	pruneCovers()
 	getSongMeta()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
+	writeSongMeta({"darkMode" & "##" & checkDarkMode()})
 	
 	if didSongChange() is true then
 		delay 1
@@ -212,6 +213,14 @@ on pruneCovers()
 		my logEvent(e)
 	end try
 end pruneCovers
+
+on checkDarkMode()
+	try
+		tell application "System Events" to tell appearance preferences to return dark mode
+	on error
+		return false
+	end try
+end checkDarkMode
 
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"

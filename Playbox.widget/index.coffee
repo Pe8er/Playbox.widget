@@ -11,7 +11,7 @@ options =
   widgetSize: "medium"                  # big | medium | smol
 
   # Choose color theme.
-  widgetTheme: "dark"                   # dark | light
+  widgetTheme: "dark"                   # auto | dark | light
 
   # Stick the widget in the corner? It removes round corners and shadows for a flat, minimalist setup.
   stickInCorner: false                  # true | false
@@ -37,9 +37,9 @@ style: """
   // Global scaling for large and medium variants.
 
   if #{options.widgetSize} == big
-    Scale = 1
+    scale = 1
   else
-    Scale = 0.75
+    scale = 0.75
 
   // Aesthetics: Color palette and blur properties.
 
@@ -56,7 +56,7 @@ style: """
 
   if #{options.stickInCorner} == false
     margin = 16pt
-    borderRadius = 8pt * Scale
+    borderRadius = 8pt * scale
     box-shadow 0 24pt 32pt 0 rgba(0,0,0,.4)
     border-radius borderRadius
     .text
@@ -99,7 +99,7 @@ style: """
   width @mainDimension
   overflow hidden
   white-space nowrap
-  background-color bgColor05
+  background-color black
   font-family system, -apple-system, "Helvetica Neue"
   font-size 8pt
   line-height 11pt
@@ -156,9 +156,9 @@ style: """
   .heart
     position absolute
     color white
-    top 4pt * Scale
+    top 4pt * scale
     #{options.horizontalPosition} @top
-    font-size 16pt * Scale
+    font-size 16pt * scale
 
 
   // Different styles for different widget sizes.
@@ -178,7 +178,7 @@ style: """
       align-items center
 
     .art
-      width mainDimension * Scale
+      width mainDimension * scale
       height @width
       margin 0
 
@@ -186,14 +186,14 @@ style: """
       position absolute
       float none
       text-align center
-      width mainDimension * Scale
+      width mainDimension * scale
       max-width @width
       bottom 0
       left 0
       margin 0
       color fColor1
       background-color none
-      padding 6pt * Scale
+      padding 6pt * scale
       -webkit-backdrop-filter blurProperties
 
 """
@@ -253,6 +253,7 @@ update: (output, domEl) ->
     tArtwork = values[5]
     songChanged = values[6]
     isLoved = values[7]
+    darkMode = values[8]
     currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
     tWidth = div.width()
     tCurrent = (tPosition / tDuration) * tWidth
@@ -293,5 +294,13 @@ update: (output, domEl) ->
       div.find('.heart').show()
     else
       div.find('.heart').hide()
+
+    if @options.widgetTheme is 'auto'
+      if darkMode is 'true'
+        @options.widgetTheme = 'dark'
+      else
+        @options.widgetTheme = 'light'
+
+
 
   div.css('max-width', screen.width)
