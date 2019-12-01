@@ -4,19 +4,22 @@
 
 options =
   # Choose where the widget should sit on your screen.
-  verticalPosition    : "bottom"        # top | center | bottom
-  horizontalPosition    : "left"        # left | center | right
+  verticalPosition    : "bottom"        # top | bottom | center
+  horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetSize: "medium"                  # big | medium | smol
+  widgetVariant: "large"                # large | medium | small
 
   # Choose color theme.
-  widgetTheme: "dark"                   # auto | dark | light
+  widgetTheme: "dark"                   # dark | light
 
-  # Stick the widget in the corner? It removes round corners and shadows for a flat, minimalist setup.
+  # Song metadata inside or outside? Applies to large and medium variants only.
+  metaPosition: "mixed"                # inside | outside | mixed
+
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false                  # true | false
 
-command: "osascript 'Playbox.widget/lib/get current track.applescript'"
+command: "osascript 'Playbox.widget/lib/Get Current Track.scpt'"
 refreshFrequency: '1s'
 
 style: """
@@ -27,52 +30,37 @@ style: """
     fColor = white
     bgColor = black
     bgBrightness = 80%
-    bgContrast = 100%
   else
     fColor = black
     bgColor = white
-    bgBrightness = 150%
-    bgContrast = 50%
+    bgBrightness = 120%
 
-  // Global scaling for large and medium variants.
-
-  if #{options.widgetSize} == big
-    scale = 1
-  else
-    scale = 0.75
-
-  // Aesthetics: Color palette and blur properties.
+  // Specify color palette and blur properties.
 
   fColor1 = rgba(fColor,1.0)
+  fColor08 = rgba(fColor,0.8)
   fColor05 = rgba(fColor,0.5)
   fColor02 = rgba(fColor,0.2)
   bgColor1 = rgba(bgColor,1.0)
+  bgColor08 = rgba(bgColor,0.7)
   bgColor05 = rgba(bgColor,0.5)
   bgColor02 = rgba(bgColor,0.2)
+  blurProperties = blur(10px) brightness(bgBrightness) contrast(100%) saturate(140%)
 
-  blurProperties = blur(16px) brightness(bgBrightness) contrast(bgContrast) saturate(140%)
-
-  // Stick in corner styling.
+  // Next, let's sort out positioning.
 
   if #{options.stickInCorner} == false
-    margin = 16pt
-    borderRadius = 8pt * scale
-    box-shadow 0 24pt 32pt 0 rgba(0,0,0,.4)
-    border-radius borderRadius
+    margin = 20px
+    box-shadow 0 20px 40px 0px rgba(0,0,0,.6)
+    border-radius 6px
     .text
-      border-radius 0 0 borderRadius borderRadius
+      border-radius 0 0 6px 6px
   else
     margin = 0
-    borderRadius = 0
-    .text
-      border-radius 0
 
-  if #{options.stickInCorner} == false and #{options.widgetSize} != smol
+  if #{options.stickInCorner} == false and #{options.widgetVariant} != small
     .art
-      border-radius borderRadius
-
-
-  // Positioning magic.
+      border-radius 6px
 
   if #{options.verticalPosition} == center
     top 50%
@@ -85,29 +73,30 @@ style: """
   else
     #{options.horizontalPosition} margin
 
-
   // Misc styles.
 
   *, *:before, *:after
     box-sizing border-box
 
-  mainDimension = 144pt
   display none
   position absolute
   transform-style preserve-3d
-  -webkit-transform translate3d(0, 0, 0)
-  width @mainDimension
+  -webkit-transform translate3d(0px, 0px, 0px)
+  mainDimension = 225px
+  width auto
+  min-width 2025px
+  max-width mainDimension
   overflow hidden
   white-space nowrap
-  background-color black
+  background-color bgColor02
   font-family system, -apple-system, "Helvetica Neue"
-  font-size 8pt
-  line-height 11pt
   border none
   -webkit-backdrop-filter blurProperties
   z-index 10
 
   .wrapper
+    font-size 8pt
+    line-height 11pt
     color fColor1
     display flex
     flex-direction row
@@ -118,7 +107,7 @@ style: """
     z-index 1
 
   .art
-    width 48pt
+    width 64px
     height @width
     background-color fColor05
     background-image url(/Playbox.widget/lib/default.png)
@@ -126,15 +115,15 @@ style: """
     z-index 2
 
   .text
-    left 64pt
-    margin 0 32pt 0 8pt
+    left 64px
+    margin 0 32px 0 8px
     max-width mainDimension
     z-index 3
 
   .progress
     width @width
-    height 1pt
-    background-color fColor1
+    height 2px
+    background fColor1
     position absolute
     bottom 0
     left 0
@@ -156,18 +145,28 @@ style: """
   .heart
     position absolute
     color white
-    top 4pt * scale
+    top 4px
     #{options.horizontalPosition} @top
-    font-size 16pt * scale
-
+    font-size 16px
 
   // Different styles for different widget sizes.
 
-  if #{options.widgetSize} == medium
+  if #{options.widgetVariant} == medium
+    Scale = 0.75
+
+    .wrapper
+      font-size 8pt !important
+      line-height 10pt !important
+
     .album
       display none
 
-  if #{options.widgetSize} == big or #{options.widgetSize} == medium
+    .heart
+      font-size 12px !important
+  else
+    Scale = 1
+
+  if #{options.widgetVariant} == large or #{options.widgetVariant} == medium
 
     min-width 0
 
@@ -178,24 +177,49 @@ style: """
       align-items center
 
     .art
-      width mainDimension * scale
+      width mainDimension * Scale
       height @width
       margin 0
 
     .text
-      position absolute
+      margin 8px
       float none
       text-align center
-      width mainDimension * scale
-      max-width @width
-      bottom 0
-      left 0
-      margin 0
-      color fColor1
-      background-color none
-      padding 6pt * scale
-      -webkit-backdrop-filter blurProperties
+      max-width (mainDimension * Scale) - 20
 
+    if #{options.metaPosition} == outside
+      .progress
+        top mainDimension * Scale
+      .art
+        border-radius 6px 6px 0 0
+
+    if #{options.metaPosition} == mixed
+      .progress
+        top mainDimension * Scale
+      .art
+        border-radius 6px 6px 0 0
+      background-color black
+        
+
+    if #{options.metaPosition} == inside
+      background-color black
+      -webkit-backdrop-filter none
+
+      .wrapper
+        overflow hidden
+
+      .text
+        // Blurred background is turned off because of insane WebKit glitches :(
+        //-webkit-backdrop-filter blurProperties
+        position absolute
+        bottom 0
+        left 0
+        margin 0
+        padding 8px
+        color fColor1
+        background-color bgColor08
+        width mainDimension * Scale
+        max-width @width
 """
 
 options : options
@@ -223,16 +247,17 @@ afterRender: (domEl) ->
   if @options.horizontalPosition is 'center'
     div.css('left', (screen.width - div.width())/2)
 
-  if @options.widgetSize isnt 'smol'
+  if @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
     meta.delay(3000).fadeOut(500)
 
-    div.on 'click', =>
-      (
-        meta.fadeIn(250).delay(3000).fadeOut(500)
-        # if @options.stickInCorner is false
-        #   div.stop(true,true).animate({zoom: '0.9', boxShadow: '0 0 2px rgba(0,0,0,1.0)'}, 300, 'swing')
-        #   div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 500, 'swing')
-        # Update
+    div.click(
+      =>
+        meta.stop(true,false).fadeIn(250).delay(3000).fadeOut(500)
+        if @options.stickInCorner is false
+          div.stop(true,true).animate({zoom: '0.99', boxShadow: '0 0 2px rgba(0,0,0,1.0)'}, 200, 'swing')
+          div.stop(true,true).animate({zoom: '1.0', boxShadow: '0 20px 40px 0px rgba(0,0,0,0.6)'}, 300, 'swing')
+          # div.find('.wrapper').stop(true,true).addClass('pushed')
+          # div.find('.wrapper').stop(true,true).removeClass('pushed')
     )
 
 # Update the rendered output.
@@ -253,7 +278,6 @@ update: (output, domEl) ->
     tArtwork = values[5]
     songChanged = values[6]
     isLoved = values[7]
-    darkMode = values[8]
     currArt = "/" + div.find('.art').css('background-image').split('/').slice(-3).join().replace(/\,/g, '/').slice(0,-1)
     tWidth = div.width()
     tCurrent = (tPosition / tDuration) * tWidth
@@ -265,6 +289,8 @@ update: (output, domEl) ->
     if currArt isnt tArtwork and tArtwork isnt 'NA'
       artwork = div.find('.art')
       artwork.css('background-image', 'url('+tArtwork+')')
+
+      # console.log("Changed to: " + tArtwork)
 
       # Trying to fade the artwork on load, failing so far.
       # if songChanged is 'true'
@@ -287,7 +313,7 @@ update: (output, domEl) ->
       artwork = div.find('.art')
       artwork.css('background-image', 'url(/Playbox.widget/lib/default.png)')
 
-    if songChanged is 'true' and @options.widgetSize isnt 'smol'
+    if songChanged is 'true' and @options.metaPosition is 'inside' and @options.widgetVariant isnt 'small'
       div.find('.text').fadeIn(250).delay(3000).fadeOut(500)
 
     if isLoved is 'true'
@@ -295,12 +321,8 @@ update: (output, domEl) ->
     else
       div.find('.heart').hide()
 
-    if @options.widgetTheme is 'auto'
-      if darkMode is 'true'
-        @options.widgetTheme = 'dark'
-      else
-        @options.widgetTheme = 'light'
-
-
-
   div.css('max-width', screen.width)
+
+  # Sort out flex-box positioning.
+  # div.parent('div').css('order', '9')
+  # div.parent('div').css('flex', '0 1 auto')
