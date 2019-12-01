@@ -1,5 +1,5 @@
 global artistName, songName, albumName, songRating, songDuration, currentPosition, musicapp, apiKey, songMetaFile, mypath, currentCoverURL, isLoved
-set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved", "darkMode"}
+set metaToGrab to {"artistName", "songName", "albumName", "songDuration", "currentPosition", "coverURL", "songChanged", "isLoved"}
 property enableLogging : false --- options: true | false
 
 set apiKey to "2e8c49b69df3c1cf31aaa36b3ba1d166"
@@ -17,10 +17,8 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 
 if isMusicPlaying() is true then
-	pruneCovers()
 	getSongMeta()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
-	writeSongMeta({"darkMode" & "##" & checkDarkMode()})
 	
 	if didSongChange() is true then
 		delay 1
@@ -53,13 +51,13 @@ spitOutput(metaToGrab) as string
 ------------------------------------------------
 
 on isMusicPlaying()
-	set apps to {"iTunes", "Spotify"}
+	set apps to {"Music", "Spotify"}
 	set answer to false
 	repeat with anApp in apps
 		tell application "System Events" to set isRunning to (name of processes) contains anApp
 		if isRunning is true then
 			try
-				using terms from application "iTunes"
+				using terms from application "Music"
 					tell application anApp
 						if player state is playing then
 							set musicapp to (anApp as string)
@@ -78,18 +76,14 @@ end isMusicPlaying
 on getSongMeta()
 	try
 		set musicAppReference to a reference to application musicapp
-		using terms from application "iTunes"
+		using terms from application "Music"
 			try
 				tell musicAppReference
 					set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
-					if musicapp is "iTunes" then
+					if musicapp is "Music" then
 						set isLoved to loved of current track as string
 					else if musicapp is "Spotify" then
-						try
-							set isLoved to starred of current track as string
-						on error
-							set isLoved to "false"
-						end try
+						set isLoved to "false"
 						set songDuration to my comma_delimit(songDuration)
 					end if
 					set currentPosition to my formatNum(player position as string)
@@ -132,8 +126,8 @@ end didCoverChange
 
 on grabCover()
 	try
-		if musicapp is "iTunes" then
-			tell application "iTunes" to tell current track
+		if musicapp is "Music" then
+			tell application "Music" to tell current track
 				if exists (every artwork) then
 					my getLocaliTunesArt()
 				else
@@ -141,7 +135,7 @@ on grabCover()
 				end if
 			end tell
 		else if musicapp is "Spotify" then
-			my getSpotifyArt()
+			my getLastfmArt()
 		end if
 	on error e
 		logEvent(e)
@@ -151,7 +145,8 @@ on grabCover()
 end grabCover
 
 on getLocaliTunesArt()
-	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
+	do shell script "rm -rf " & readSongMeta({"oldFilename"}) -- delete old artwork
+	tell application "Music" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
 		if format is Çclass PNG È then -- figure out the proper file extension
 			set ext to ".png"
@@ -159,7 +154,7 @@ on getLocaliTunesArt()
 			set ext to ".jpg"
 		end if
 	end tell
-	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 9) & ext as string -- get the filename to ~/my path/cover.ext
+	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 999) & ext as string -- get the filename to ~/my path/cover.ext
 	set outFile to open for access file fileName with write permission -- write to file
 	set eof outFile to 0 -- truncate the file
 	write srcBytes to outFile -- write the image bytes to the file
@@ -169,58 +164,37 @@ on getLocaliTunesArt()
 	set currentCoverURL to getPathItem(currentCoverURL)
 end getLocaliTunesArt
 
-on getSpotifyArt()
-	try
-		tell application "Spotify" to set currentCoverURL to artwork url of current track
-	on error e
-		my logEvent(e)
-		set coverDownloaded to false
-		set rawXML to ""
-		set currentCoverURL to "NA"
-		repeat 5 times
+on getLastfmArt()
+	set coverDownloaded to false
+	set rawXML to ""
+	set currentCoverURL to "NA"
+	repeat 5 times
+		try
+			set rawXML to (do shell script "curl 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=" & quoted form of (my encodeText(artistName, true, false, 1)) & "&album=" & quoted form of (my encodeText(albumName, true, false, 1)) & "&api_key=" & apiKey & "'")
+			delay 1
+		on error e
+			my logEvent(e & return & rawXML)
+		end try
+		if rawXML is not "" then
 			try
-				set rawXML to (do shell script "curl 'http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=" & my textReplace(artistName, space, "+") & "&album=" & my textReplace(albumName, space, "+") & "&api_key=" & apiKey & "'")
-				delay 1
+				set AppleScript's text item delimiters to "extralarge\">"
+				set processingXML to text item 2 of rawXML
+				set AppleScript's text item delimiters to "</image>"
+				set currentCoverURL to text item 1 of processingXML
+				set AppleScript's text item delimiters to ""
+				if currentCoverURL is "" then
+					my logEvent("Cover art unavailable." & return & rawXML)
+					set currentCoverURL to "NA"
+					set coverDownloaded to true
+				end if
 			on error e
 				my logEvent(e & return & rawXML)
 			end try
-			if rawXML is not "" then
-				try
-					set AppleScript's text item delimiters to "extralarge\">"
-					set processingXML to text item 2 of rawXML
-					set AppleScript's text item delimiters to "</image>"
-					set currentCoverURL to text item 1 of processingXML
-					set AppleScript's text item delimiters to ""
-					if currentCoverURL is "" then
-						my logEvent("Cover art unavailable." & return & rawXML)
-						set currentCoverURL to "NA"
-						set coverDownloaded to true
-					end if
-				on error e
-					my logEvent(e & return & rawXML)
-				end try
-				set coverDownloaded to true
-			end if
-			if coverDownloaded is true then exit repeat
-		end repeat
-	end try
-end getSpotifyArt
-
-on pruneCovers()
-	try
-		do shell script "rm '" & readSongMeta({"oldFilename"}) & "'"
-	on error e
-		my logEvent(e)
-	end try
-end pruneCovers
-
-on checkDarkMode()
-	try
-		tell application "System Events" to tell appearance preferences to return dark mode
-	on error
-		return false
-	end try
-end checkDarkMode
+			set coverDownloaded to true
+		end if
+		if coverDownloaded is true then exit repeat
+	end repeat
+end getLastfmArt
 
 on getPathItem(aPath)
 	set AppleScript's text item delimiters to "/"
@@ -340,15 +314,6 @@ on number_to_string(this_number)
 	end if
 end number_to_string
 
-on textReplace(sourceText, searchText, replaceText)
-	set {TID, AppleScript's text item delimiters} to {AppleScript's text item delimiters, searchText}
-	set textItems to every text item of sourceText
-	set AppleScript's text item delimiters to replaceText
-	set changedText to textItems as string
-	set AppleScript's text item delimiters to TID
-	return changedText
-end textReplace
-
 on encodeText(this_text, encode_URL_A, encode_URL_B, method)
 	--http://www.macosxautomation.com/applescript/sbrt/sbrt-08.html
 	set the standard_characters to "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -392,7 +357,8 @@ end checkFile
 on logEvent(e)
 	if enableLogging is true then
 		set e to e as string
-		do shell script "echo '" & (current date) & space & e & "' >> ~/Library/Logs/CurrentTrack.log"
+		tell application "Finder" to set myName to (name of file (path to me))
+		do shell script "echo '" & (current date) & space & quoted form of e & "' >> ~/Library/Logs/" & quoted form of myName & ".log"
 	else
 		return
 	end if
