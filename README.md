@@ -21,16 +21,19 @@ Here's how you can set all the widget's options. Open `index.coffee` and look at
 
 ```coffeescript
   # Choose where the widget should sit on your screen.
-  verticalPosition    : "bottom"        # top | center | bottom
-  horizontalPosition    : "left"        # left | center | right
+  verticalPosition    : "bottom"        # top | bottom | center
+  horizontalPosition    : "left"        # left | right | center
 
   # Choose widget size.
-  widgetSize: "medium"                  # big | medium | smol
+  widgetVariant: "large"                # large | medium | small
 
   # Choose color theme.
   widgetTheme: "dark"                   # dark | light
 
-  # Stick the widget in the corner? It removes round corners and shadows for a flat, minimalist setup.
+  # Song metadata inside or outside? Applies to large and medium variants only.
+  metaPosition: "mixed"                # inside | outside | mixed
+
+  # Stick the widget in the corner? Set to *true* if you're using it with Sidebar widget, set to *false* if you'd like to give it some breathing room and a drop shadow.
   stickInCorner: false                  # true | false
 ```
 
