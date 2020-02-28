@@ -84,7 +84,7 @@ style: """
   -webkit-transform translate3d(0px, 0px, 0px)
   mainDimension = 225px
   width auto
-  min-width 2025px
+  min-width 225px
   max-width mainDimension
   overflow hidden
   white-space nowrap
