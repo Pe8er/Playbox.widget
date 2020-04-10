@@ -133,29 +133,32 @@ export const className = `
 export const command = "osascript UeberPlayer.widget/getTrack.scpt | echo";
 
 export const initialState = {
-  playing: false,
+  playing: false,           // If currently playing a soundtrack
   data: {
-    track: "",
-    artist: "",
-    album: "",
-    artwork: "",
-    onlineArtwork: "",
-    duration: 0,
-    elapsed: 0
+    track: "",              // Name of soundtrack
+    artist: "",             // Name of artist
+    album: "",              // Name of album
+    artwork: "",            // Locally stored url for album artwork
+    onlineArtwork: "",      // Online url for album artwork
+    duration: 0,            // Total duration of soundtrack in seconds
+    elapsed: 0              // Total time elapsed in seconds
   }
 };
 
 // FUNCTIONS //
 
+// Get album artwork and cache it in memory
 const getArtwork = (url, album, artist) => {
   const filename = `${album}-${artist}.jpg`.split(' ').join('');
 
+  // Run an applescript to check if artwork is already cached, and if not, cache it for later use
   run(`osascript UeberPlayer.widget/getArtwork.scpt ${url} "${filename}" | echo`)
   .then((output) => output);
 
   return `UeberPlayer.widget/cache/${filename}`;
 }
 
+// Update state
 export const updateState = ({ output, error }, previousState) => {
   // Check for errors
   if (error) {
@@ -175,9 +178,10 @@ export const updateState = ({ output, error }, previousState) => {
   ] = output.split("\n").slice(1, -1);
   playing = playing === "true";
 
-  if (!playing) {
+  // State controller
+  if (!playing) {   // If player is paused
     return { ...previousState, playing };
-  } else if (track !== previousState.data.track || album !== previousState.data.album) {
+  } else if (track !== previousState.data.track || album !== previousState.data.album) {    // Song change
     return {
       playing,
       data: {
@@ -190,11 +194,12 @@ export const updateState = ({ output, error }, previousState) => {
         elapsed
       }
     }
-  } else {
+  } else {  // Currently playing
     return { playing, data: { ...previousState.data, elapsed }};
   }
 }
 
+// Big player component
 const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }) => (
   <BigPlayer>
     <ArtworkWrapper>
@@ -209,6 +214,7 @@ const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }
   </BigPlayer>
 );
 
+// Render function
 export const render = ({ playing, data }) => {
   const { size } = options;
 

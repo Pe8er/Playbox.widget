@@ -1,6 +1,6 @@
 #!/usr/bin/osascript
 
-# Global vars
+-- Global vars
 set playingState to false
 set trackName to ""
 set artistName to ""
@@ -9,7 +9,7 @@ set artworkURL to ""
 set trackDuration to 0
 set timeElapsed to 0
 
-# Spotify
+-- Spotify
 if application "Spotify" is running then
   tell application "Spotify"
     if the player state is playing then
@@ -24,7 +24,7 @@ if application "Spotify" is running then
   end tell
 end if
 
-# Log results
+-- Log results
 log playingState
 if playingState then
   log trackName
