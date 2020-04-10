@@ -1,6 +1,14 @@
 
 import { styled, run } from "uebersicht"
 
+// CUSTOMIZATION
+
+const options = {
+  // Widget size!  --  big | medium | small | mini
+  size: "big",
+}
+
+
 // EMOTION COMPONENTS
 
 const Wrapper = styled("div")`
@@ -10,6 +18,8 @@ const Wrapper = styled("div")`
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 16px 32px 9px #0005;
+  opacity: ${props => props.playing ? 1 : 0};
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 
   &::before {
     content: "";
@@ -181,24 +191,30 @@ export const updateState = ({ output, error }, previousState) => {
       }
     }
   } else {
-    return { ...previousState, data: { ...previousState.data, elapsed }};
+    return { playing, data: { ...previousState.data, elapsed }};
   }
 }
 
+const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }) => (
+  <BigPlayer>
+    <ArtworkWrapper>
+      <Artwork localArt={artwork} onlineArt={onlineArtwork}/>
+    </ArtworkWrapper>
+    <Information>
+      <Progress percent={elapsed / duration * 100}/>
+      <Track>{track}</Track>
+      <Artist>{artist}</Artist>
+      <Album>{album}</Album>
+    </Information>
+  </BigPlayer>
+);
+
 export const render = ({ playing, data }) => {
+  const { size } = options;
+
   return (
-    <Wrapper>
-      <BigPlayer>
-        <ArtworkWrapper>
-          <Artwork localArt={data.artwork} onlineArt={data.onlineArtwork}/>
-        </ArtworkWrapper>
-        <Information>
-          <Progress percent={data.elapsed / data.duration * 100}/>
-          <Track>{data.track}</Track>
-          <Artist>{data.artist}</Artist>
-          <Album>{data.album}</Album>
-        </Information>
-      </BigPlayer>
+    <Wrapper playing={playing}>
+      {size === "big" && big(data)}
     </Wrapper>
   )
 };
