@@ -5,7 +5,7 @@ import { styled, run } from "uebersicht"
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "big",
+  size: "medium",
 }
 
 
@@ -41,12 +41,23 @@ const BigPlayer = styled("div")`
   width: 240px;
 `;
 
+const MediumPlayer = styled("div")`
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+`
+
 const ArtworkWrapper = styled("div")`
   position: relative;
   width: 240px;
   height: 240px;
   background: url("UeberPlayer.widget/default.png");
   background-size: cover;
+
+  &.medium {
+    width: 180px;
+    height: 180px;
+  }
 
   &::before {
     position: absolute;
@@ -63,6 +74,11 @@ const Artwork = styled("div")`
   height: 240px;
   background: url("${props => props.localArt}"), url("${props => props.onlineArt}"), transparent;
   background-size: cover;
+
+  &.medium {
+    width: 180px;
+    height: 180px;
+  }
 `;
 
 const Information = styled("div")`
@@ -214,6 +230,20 @@ const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }
   </BigPlayer>
 );
 
+// Medium player component
+const medium = ({ track, artist, artwork, onlineArtwork, elapsed, duration }) => (
+  <MediumPlayer>
+    <ArtworkWrapper className="medium">
+      <Artwork className="medium" localArt={artwork} onlineArt={onlineArtwork}/>
+    </ArtworkWrapper>
+    <Information>
+      <Progress percent={elapsed / duration * 100}/>
+      <Track>{track}</Track>
+      <Artist>{artist}</Artist>
+    </Information>
+  </MediumPlayer>
+)
+
 // Render function
 export const render = ({ playing, data }) => {
   const { size } = options;
@@ -221,6 +251,7 @@ export const render = ({ playing, data }) => {
   return (
     <Wrapper playing={playing}>
       {size === "big" && big(data)}
+      {size === "medium" && medium(data)}
     </Wrapper>
   )
 };
