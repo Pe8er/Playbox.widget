@@ -5,7 +5,7 @@ import { styled, run } from "uebersicht"
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "small",
+  size: "mini",
 }
 
 
@@ -15,14 +15,15 @@ const Wrapper = styled("div")`
   position: absolute;
   top: 20px;
   left: 20px;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 16px 32px 9px #0005;
+  border-radius: ${props => props.mini ? 0 : "6px"};
+  overflow: ${props => props.mini ? "visible" : "hidden"};
+  box-shadow: ${props => props.mini ? "0" : "0 16px 32px 9px #0005"};
   opacity: ${props => props.playing ? 1 : 0};
   transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 
   &::before {
     content: "";
+    display: ${props => props.mini ? "none" : "initial"};
     position: absolute;
     top: 0;
     left: 0;
@@ -52,6 +53,22 @@ const SmallPlayer = styled("div")`
   display: flex;
   height: 80px;
   width: 340px;
+`
+
+const MiniPlayer = styled("div")`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  line-height: 1;
+
+  * {
+    text-shadow: 0 2px 12px #0008;
+  }
+
+  > * + * {
+    margin-top: .5em;
+  }
 `
 
 const ArtworkWrapper = styled("div")`
@@ -136,11 +153,6 @@ const Progress = styled("div")`
   height: 2px;
   background: transparent;
 
-  &.small {
-    top: initial;
-    bottom: 0;
-  }
-
   &::after {
     content: "";
     position: absolute;
@@ -151,6 +163,20 @@ const Progress = styled("div")`
     background: white;
     transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  &.small {
+    top: initial;
+    bottom: 0;
+  }
+
+  &.mini {
+    position: relative;
+    height: 4px;
+    border-radius: 2px;
+    background: #0002;
+    box-shadow: 0 3px 5px -1px #0003;
+    overflow: hidden;
+  }
 `
 
 const Track = styled("p")`
@@ -160,6 +186,10 @@ const Track = styled("p")`
   &.small {
     font-size: .65em;
   }
+
+  &.mini {
+    font-size: 1.2em;
+  }
 `
 
 const Artist = styled("p")`
@@ -167,6 +197,10 @@ const Artist = styled("p")`
 
   &.small {
     font-size: .65em;
+  }
+
+  &.mini {
+    font-size: 1em;
   }
 `
 
@@ -307,15 +341,24 @@ const small = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration
   </SmallPlayer>
 )
 
+const mini = ({ track, artist, elapsed, duration }) => (
+  <MiniPlayer>
+    <Track className="mini">{track}</Track>
+    <Artist className="mini">{artist}</Artist>
+    <Progress className="mini" percent={elapsed / duration * 100}/>
+  </MiniPlayer>
+)
+
 // Render function
 export const render = ({ playing, data }) => {
   const { size } = options;
 
   return (
-    <Wrapper playing={playing}>
+    <Wrapper playing={playing} mini={size === "mini"}>
       {size === "big" && big(data)}
       {size === "medium" && medium(data)}
       {size === "small" && small(data)}
+      {size === "mini" && mini(data)}
     </Wrapper>
   )
 };
