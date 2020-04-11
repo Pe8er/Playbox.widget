@@ -5,7 +5,7 @@ import { styled, run } from "uebersicht"
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "medium",
+  size: "small",
 }
 
 
@@ -47,6 +47,13 @@ const MediumPlayer = styled("div")`
   width: 180px;
 `
 
+const SmallPlayer = styled("div")`
+  position: relative;
+  display: flex;
+  height: 80px;
+  width: 340px;
+`
+
 const ArtworkWrapper = styled("div")`
   position: relative;
   width: 240px;
@@ -57,6 +64,11 @@ const ArtworkWrapper = styled("div")`
   &.medium {
     width: 180px;
     height: 180px;
+  }
+
+  &.small {
+    width: 80px;
+    height: 80px;
   }
 
   &::before {
@@ -79,6 +91,11 @@ const Artwork = styled("div")`
     width: 180px;
     height: 180px;
   }
+
+  &.small {
+    width: 80px;
+    height: 80px;
+  }
 `;
 
 const Information = styled("div")`
@@ -95,6 +112,20 @@ const Information = styled("div")`
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  &.small {
+    flex: 1;
+    width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 0 6px 6px 0;
+    line-height: 1.4;
+  }
+
+  &.small > p {
+    text-align: left;
+  }
 `
 
 const Progress = styled("div")`
@@ -104,6 +135,11 @@ const Progress = styled("div")`
   right: 0;
   height: 2px;
   background: transparent;
+
+  &.small {
+    top: initial;
+    bottom: 0;
+  }
 
   &::after {
     content: "";
@@ -120,16 +156,28 @@ const Progress = styled("div")`
 const Track = styled("p")`
   font-weight: bold;
   font-size: .7em;
+
+  &.small {
+    font-size: .65em;
+  }
 `
 
 const Artist = styled("p")`
   font-size: .7em;
+
+  &.small {
+    font-size: .65em;
+  }
 `
 
 const Album = styled("p")`
   font-size: .65em;
   color: #e6e6e6;
   opacity: .75;
+
+  &.small {
+    font-size: .55em;
+  }
 `
 
 // UEBER-SPECIFIC STUFF //
@@ -223,9 +271,9 @@ const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }
     </ArtworkWrapper>
     <Information>
       <Progress percent={elapsed / duration * 100}/>
-      <Track>{track}</Track>
-      <Artist>{artist}</Artist>
-      <Album>{album}</Album>
+      <Track className="small">{track}</Track>
+      <Artist className="small">{artist}</Artist>
+      <Album className="small">{album}</Album>
     </Information>
   </BigPlayer>
 );
@@ -244,6 +292,21 @@ const medium = ({ track, artist, artwork, onlineArtwork, elapsed, duration }) =>
   </MediumPlayer>
 )
 
+// Small player component
+const small = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }) => (
+  <SmallPlayer>
+    <ArtworkWrapper className="small">
+      <Artwork className="small" localArt={artwork} onlineArt={onlineArtwork}/>
+    </ArtworkWrapper>
+    <Information className="small">
+      <Track>{track}</Track>
+      <Artist>{artist}</Artist>
+      <Album>{album}</Album>
+      <Progress className="small" percent={elapsed / duration * 100}/>
+    </Information>
+  </SmallPlayer>
+)
+
 // Render function
 export const render = ({ playing, data }) => {
   const { size } = options;
@@ -252,6 +315,7 @@ export const render = ({ playing, data }) => {
     <Wrapper playing={playing}>
       {size === "big" && big(data)}
       {size === "medium" && medium(data)}
+      {size === "small" && small(data)}
     </Wrapper>
   )
 };
