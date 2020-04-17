@@ -5,7 +5,7 @@ import { styled, run } from "uebersicht"
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "mini",
+  size: "big",
 }
 
 
@@ -247,11 +247,11 @@ export const initialState = {
 
 // Get album artwork and cache it in memory
 const getArtwork = (url, album, artist) => {
-  const filename = `${album}-${artist}.jpg`.split(' ').join('');
+  // Parse a safe image name for caching
+  const filename = `${album}-${artist}.jpg`.split(/[" ]/).join('');
 
   // Run an applescript to check if artwork is already cached, and if not, cache it for later use
-  run(`osascript UeberPlayer.widget/getArtwork.scpt ${url} "${filename}" | echo`)
-  .then((output) => output);
+  run(`osascript UeberPlayer.widget/getArtwork.scpt ${url} "${filename}" | echo`);
 
   return `UeberPlayer.widget/cache/${filename}`;
 }
