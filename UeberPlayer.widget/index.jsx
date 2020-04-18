@@ -246,12 +246,12 @@ export const initialState = {
 // FUNCTIONS //
 
 // Get album artwork and cache it in memory
-const getArtwork = (url, album, artist) => {
+const getArtwork = (app, url, album, artist, ext) => {
   // Parse a safe image name for caching
-  const filename = `${album}-${artist}.jpg`.split(/[" ]/).join('');
+  const filename = `${album}-${artist}.${ext}`.split(/[" ]/).join('');
 
   // Run an applescript to check if artwork is already cached, and if not, cache it for later use
-  run(`osascript UeberPlayer.widget/getArtwork.scpt ${url} "${filename}" | echo`);
+  run(`osascript UeberPlayer.widget/getArtwork.scpt ${app} "${filename}" ${url} ${ext} | echo`);
 
   return `UeberPlayer.widget/cache/${filename}`;
 }
@@ -267,10 +267,12 @@ export const updateState = ({ output, error }, previousState) => {
   // Extract & parse applescript output
   let [
     playing,
+    app,
     track,
     artist,
     album,
     artworkURL,
+    artExtension,
     duration,
     elapsed
   ] = output.split("\n").slice(1, -1);
@@ -286,14 +288,21 @@ export const updateState = ({ output, error }, previousState) => {
         track,
         artist,
         album,
-        artwork: getArtwork(artworkURL, album, artist),
+        artwork: getArtwork(app, artworkURL, album, artist, artExtension),
         onlineArtwork: artworkURL,
         duration,
         elapsed
       }
     }
   } else {  // Currently playing
-    return { playing, data: { ...previousState.data, elapsed }};
+    return {
+      playing,
+      data: {
+        ...previousState.data,
+        artwork: previousState.data.artwork + (/.+#1$/.test(previousState.data.artwork) ? "" : "#1"),
+        elapsed
+      }
+    };
   }
 }
 
