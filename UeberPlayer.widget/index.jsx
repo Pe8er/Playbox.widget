@@ -245,7 +245,7 @@ export const initialState = {
 
 // FUNCTIONS //
 
-// Initialize function
+// Initialize function (remove old, cached files)
 export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +15 -delete`);
 
 // Update state

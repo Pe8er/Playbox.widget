@@ -16,7 +16,7 @@ set timeElapsed to 0
 set artExtension to ""
 
 --- -- - MAIN ROUTINE - -- ---
--- Setup
+-- Setup `mypath`
 try
   set mypath to POSIX path of (path to me)
   set AppleScript's text item delimiters to "/"
@@ -26,7 +26,7 @@ on error e
   error "Couldn't set up mypath!" & e
 end try
 
--- Get Spotify track data
+-- Get Spotify track data if playing
 if application "Spotify" is running then
   tell application "Spotify"
     if the player state is playing then
@@ -44,7 +44,7 @@ if application "Spotify" is running then
   end tell
 end if
 
--- Get Apple Music track data
+-- Get Apple Music track data if playing
 if playingState is false and application "Music" is running then
   tell application "Music"
     if the player state is playing then
@@ -66,17 +66,19 @@ if playingState is false and application "Music" is running then
   end tell
 end if
 
+-- Trigger extra changes if song changed
 if playingState and my songChanged() then
+  -- Setup local artwork filename and location
   set artworkFilename to generateArtFilename(albumName & "-" & artistName & artExtension as string)
   set cache_file to (mypath & "cache/" & artworkFilename as string)
 
-  if my fileExists(cache_file) is false then
+  if my fileExists(cache_file) is false then    -- If artwork isn't cached, download and cache it
     if appName is "Spotify" then
       my extractSpotifyArt()
     else if appName is "Music" then
       my extractMusicArt()
     end if
-  else
+  else    -- Else, touch the cached file to keep it "fresh"
     set command to "touch \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
     do shell script command
   end if
@@ -91,9 +93,12 @@ return retStr
 
 --- -- - SUBROUTINES - -- ---
 
+-- Function to determine if a song changed happened
 on songChanged()
+  -- Use a .plist file to detect changes
   set plist_filepath to (mypath & "currentTrack.plist" as string)
 
+  -- If .plist file doesn't exist, create it and return true (supposing this is a first-time run for the user)
   if fileExists(plist_filepath) is false then
     tell application "System Events"
       set the parent_dictionary to make new property list item with properties { kind:record }
@@ -123,6 +128,7 @@ on songChanged()
   end tell
 end songChanged
 
+-- Simple function to return if a file exists or not
 on fileExists(f)
   tell application "System Events"
     if exists file f then
@@ -133,6 +139,7 @@ on fileExists(f)
   end tell
 end fileExists
 
+-- Generate a "safe" filename for cached artwork (no whitespace nor quotation marks)
 on generateArtFilename(str)
   set charsToCheck to characters of str
   set retList to {}
@@ -144,23 +151,26 @@ on generateArtFilename(str)
   return retList as string
 end generateArtFilename
 
+-- Extract artwork file from Spotify
 on extractSpotifyArt()
   set command to "curl " & artworkURL & " --create-dirs -o \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
   do shell script command
 end extractSpotifyArt
 
+-- Extract artwork from Apple Music
 on extractMusicArt()
   tell application "Music" to tell artwork 1 of current track
     set srcBytes to raw data
   end tell
 
-  set mypath to POSIX path of (path to me)
+  -- Use alternate way of getting the path because the other one doesn't work for some reason?
+  set myAltPath to POSIX path of (path to me)
 	set AppleScript's text item delimiters to "/"
-	set mypath to (mypath's text items 1 thru -2 as string) & "/"
+	set myAltPath to (myAltPath's text items 1 thru -2 as string) & "/"
 	set AppleScript's text item delimiters to ""
-  set mypath to (mypath as POSIX file) & "cache:" & artworkFilename as string
+  set myAltPath to (myAltPath as POSIX file) & "cache:" & artworkFilename as string
 
-  set outFile to open for access file mypath with write permission
+  set outFile to open for access file myAltPath with write permission
   set eof outFile to 0
   write srcBytes to outFile starting at eof
   close access outFile
