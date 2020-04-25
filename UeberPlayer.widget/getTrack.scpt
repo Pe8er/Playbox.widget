@@ -23,7 +23,7 @@ try
 	set mypath to (mypath's text items 1 thru -2 as string) & "/"
 	set AppleScript's text item delimiters to ""
 on error e
-  error "Something happened!"
+  error "Couldn't set up mypath!" & e
 end try
 
 -- Get Spotify track data
@@ -67,15 +67,18 @@ if playingState is false and application "Music" is running then
 end if
 
 if playingState and my songChanged() then
-  set artworkFilename to generateArtFilename(albumName & artistName & artExtension as string)
+  set artworkFilename to generateArtFilename(albumName & "-" & artistName & artExtension as string)
   set cache_file to (mypath & "cache/" & artworkFilename as string)
 
   if my fileExists(cache_file) is false then
     if appName is "Spotify" then
-      my extractSpotifyArt(artworkFilename)
+      my extractSpotifyArt()
     else if appName is "Music" then
-      my extractMusicArt(artworkFilename)
+      my extractMusicArt()
     end if
+  else
+    set command to "touch \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
+    do shell script command
   end if
 end if
 
@@ -141,12 +144,12 @@ on generateArtFilename(str)
   return retList as string
 end generateArtFilename
 
-on extractSpotifyArt(filename)
-  set command to "curl " & artworkURL & " --create-dirs -o \"./UeberPlayer.widget/cache/" & filename & "\""
+on extractSpotifyArt()
+  set command to "curl " & artworkURL & " --create-dirs -o \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
   do shell script command
 end extractSpotifyArt
 
-on extractMusicArt(filename)
+on extractMusicArt()
   tell application "Music" to tell artwork 1 of current track
     set srcBytes to raw data
   end tell
@@ -155,7 +158,7 @@ on extractMusicArt(filename)
 	set AppleScript's text item delimiters to "/"
 	set mypath to (mypath's text items 1 thru -2 as string) & "/"
 	set AppleScript's text item delimiters to ""
-  set mypath to (mypath as POSIX file) & "cache:" & filename as string
+  set mypath to (mypath as POSIX file) & "cache:" & artworkFilename as string
 
   set outFile to open for access file mypath with write permission
   set eof outFile to 0
