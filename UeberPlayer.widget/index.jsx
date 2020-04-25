@@ -228,7 +228,7 @@ export const className = `
   }
 `;
 
-export const command = "osascript UeberPlayer.widget/getTrack.scpt | echo";
+export const command = "osascript UeberPlayer.widget/getTrack.scpt";
 
 export const initialState = {
   playing: false,           // If currently playing a soundtrack
@@ -244,17 +244,6 @@ export const initialState = {
 };
 
 // FUNCTIONS //
-
-// Get album artwork and cache it in memory
-const getArtwork = (app, url, album, artist, ext) => {
-  // Parse a safe image name for caching
-  const filename = `${album}-${artist}.${ext}`.split(/[" ]/).join('');
-
-  // Run an applescript to check if artwork is already cached, and if not, cache it for later use
-  run(`osascript UeberPlayer.widget/getArtwork.scpt ${app} "${filename}" ${url} ${ext} | echo`);
-
-  return `UeberPlayer.widget/cache/${filename}`;
-}
 
 // Update state
 export const updateState = ({ output, error }, previousState) => {
@@ -272,11 +261,16 @@ export const updateState = ({ output, error }, previousState) => {
     artist,
     album,
     artworkURL,
-    artExtension,
+    artworkFilename,
     duration,
     elapsed
-  ] = output.split("\n").slice(1, -1);
-  playing = playing === "true";
+  ] = output.split(" @@ ");
+
+  playing = (playing === "true");
+  duration = Math.floor(parseFloat(duration));
+  elapsed = Math.floor(parseFloat(elapsed));
+
+  console.log(playing, app, track, artist, album, artworkURL, artworkFilename, duration, elapsed);
 
   // State controller
   if (!playing) {   // If player is paused
@@ -288,7 +282,7 @@ export const updateState = ({ output, error }, previousState) => {
         track,
         artist,
         album,
-        artwork: getArtwork(app, artworkURL, album, artist, artExtension),
+        localArtwork: `UeberPlayer.widget/cache/${artworkFilename}`,
         onlineArtwork: artworkURL,
         duration,
         elapsed
@@ -299,7 +293,6 @@ export const updateState = ({ output, error }, previousState) => {
       playing,
       data: {
         ...previousState.data,
-        artwork: previousState.data.artwork + (/.+#1$/.test(previousState.data.artwork) ? "" : "#1"),
         elapsed
       }
     };
@@ -307,10 +300,10 @@ export const updateState = ({ output, error }, previousState) => {
 }
 
 // Big player component
-const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }) => (
+const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }) => (
   <BigPlayer>
     <ArtworkWrapper>
-      <Artwork localArt={artwork} onlineArt={onlineArtwork}/>
+      <Artwork localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
       <Progress percent={elapsed / duration * 100}/>
@@ -322,10 +315,10 @@ const big = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }
 );
 
 // Medium player component
-const medium = ({ track, artist, artwork, onlineArtwork, elapsed, duration }) => (
+const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration }) => (
   <MediumPlayer>
     <ArtworkWrapper className="medium">
-      <Artwork className="medium" localArt={artwork} onlineArt={onlineArtwork}/>
+      <Artwork className="medium" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
       <Progress percent={elapsed / duration * 100}/>
@@ -336,10 +329,10 @@ const medium = ({ track, artist, artwork, onlineArtwork, elapsed, duration }) =>
 )
 
 // Small player component
-const small = ({ track, artist, album, artwork, onlineArtwork, elapsed, duration }) => (
+const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }) => (
   <SmallPlayer>
     <ArtworkWrapper className="small">
-      <Artwork className="small" localArt={artwork} onlineArt={onlineArtwork}/>
+      <Artwork className="small" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information className="small">
       <Track>{track}</Track>
