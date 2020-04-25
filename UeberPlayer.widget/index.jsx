@@ -270,7 +270,7 @@ export const updateState = ({ output, error }, previousState) => {
   duration = Math.floor(parseFloat(duration));
   elapsed = Math.floor(parseFloat(elapsed));
 
-  console.log(playing, app, track, artist, album, artworkURL, artworkFilename, duration, elapsed);
+  // console.log(playing, app, track, artist, album, artworkURL, artworkFilename, duration, elapsed);
 
   // State controller
   if (!playing) {   // If player is paused

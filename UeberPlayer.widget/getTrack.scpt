@@ -1,7 +1,7 @@
 #!/usr/bin/osascript
 
 -- Global vars
-global playingState, appName, trackName, artistName, albumName, artworkURL, artworkFilename, trackDuration, artworkExtension
+global playingState, appName, trackName, artistName, albumName, artworkURL, artworkFilename, trackDuration, mypath, artExtension
 
 set playingState to false
 set appName to ""
@@ -13,7 +13,7 @@ set artworkFilename to ""
 set trackDuration to 0
 set timeElapsed to 0
 
-set artworkExtension to ""
+set artExtension to ""
 
 --- -- - MAIN ROUTINE - -- ---
 -- Setup
@@ -39,7 +39,7 @@ if application "Spotify" is running then
       set trackDuration to the (duration of current track) / 1000
       set timeElapsed to the player position
 
-      set artworkExtension to "jpg"
+      set artExtension to ".jpg"
     end if
   end tell
 end if
@@ -58,25 +58,23 @@ if playingState is false and application "Music" is running then
       set timeElapsed to the player position
 
       if format of item 1 of artworks in current track is «class PNG » then
-        set artworkExtension to "png"
+        set artExtension to ".png"
       else
-        set artworkExtension to "jpg"
+        set artExtension to ".jpg"
       end if
     end if
   end tell
 end if
 
-if playingState then
-  if my songChanged() then
-    set artworkFilename to generateArtFilename((albumName & artistName & "." & artworkExtension as string))
-    set cache_file to (mypath & "cache/" & artworkFilename as string)
+if playingState and my songChanged() then
+  set artworkFilename to generateArtFilename(albumName & artistName & artExtension as string)
+  set cache_file to (mypath & "cache/" & artworkFilename as string)
 
-    if my fileExists(cache_file) is false then
-      if appName is "Spotify" then
-        my extractSpotifyArt(artworkFilename)
-      else if appName is "Music" then
-        my extractMusicArt(artworkFilename)
-      end if
+  if my fileExists(cache_file) is false then
+    if appName is "Spotify" then
+      my extractSpotifyArt(artworkFilename)
+    else if appName is "Music" then
+      my extractMusicArt(artworkFilename)
     end if
   end if
 end if
@@ -91,16 +89,45 @@ return retStr
 --- -- - SUBROUTINES - -- ---
 
 on songChanged()
-  return true
+  set plist_filepath to (mypath & "currentTrack.plist" as string)
+
+  if fileExists(plist_filepath) is false then
+    tell application "System Events"
+      set the parent_dictionary to make new property list item with properties { kind:record }
+      set plist_file to make new property list file with properties { contents: parent_dictionary, name: plist_filepath }
+      tell property list items of plist_file
+        make new property list item at end with properties { kind: string, name: "album", value: albumName }
+        make new property list item at end with properties { kind: string, name: "artist", value: artistName }
+      end tell
+      return true
+    end tell
+  end if
+
+  tell application "System Events"
+    try
+      tell property list file plist_filepath
+        if (value of property list item "album" is not albumName) or (value of property list item "artist" is not artistName)
+          set value of property list item "album" to albumName
+          set value of property list item "artist" to artistName
+          return true
+        else
+          return false
+        end if
+      end tell
+    on error e
+      error e
+    end try
+  end tell
 end songChanged
 
 on fileExists(f)
-	try
-		POSIX file myfile as alias
-		return true
-	on error
-		return false
-	end try
+  tell application "System Events"
+    if exists file f then
+      return true
+    else
+      return false
+    end if
+  end tell
 end fileExists
 
 on generateArtFilename(str)
