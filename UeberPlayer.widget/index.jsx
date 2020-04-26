@@ -8,7 +8,7 @@ const Theif = new ColorTheif();
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "mini",
+  size: "small",
 }
 
 
@@ -327,11 +327,13 @@ const updateSongData = (output, error, previousState) => {
   }
 }
 
+// Converts rgb to hex
 const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
   const hex = x.toString(16)
   return hex.length === 1 ? '0' + hex : hex
 }).join('')
 
+// Calculates the relative luminance of an rgb color
 const luminance = (r, g, b) => {
   const a = [r, g, b].map((x) => {
     x /= 255;
@@ -340,37 +342,43 @@ const luminance = (r, g, b) => {
   return a[0] * .2126 + a[1] * .7152 + a[2] * .0722;
 }
 
+// Calculates contrast from two luminance values from two colors
 const contrast = (lum1, lum2) => {
   const lightest = Math.max(lum1, lum2);
   const darkest = Math.min(lum1, lum2);
   return (lightest + .05) / (darkest + .05);
 }
 
+// Update adaptive colors
 const updateColors = (theif, previousState) => {
   const primaryColor = theif.dominantColor;
   let secondaryColor, tercaryColor;
 
   let secondaryContrast = 0, tercaryContrast = 0;
   const primaryColorLum = luminance(primaryColor[0], primaryColor[1], primaryColor[2]);
+
+  // Find appropriate color choices in palette
   for (const swatch of theif.palette) {
+    // Calculate the contrast between the background color and the tested color
     const swatchLum = luminance(swatch[0], swatch[1], swatch[2]);
     const contrastValue = contrast(primaryColorLum, swatchLum);
 
+    // If enough contrast (2 is a good number imo, though W3 recommends 4.5), use this color
     if (contrastValue >= 2) {
-      if (secondaryContrast < 2) {
+      if (secondaryContrast < 2) {    // Secondary color takes priority
         secondaryColor = swatch;
         secondaryContrast = contrastValue;
-      } else {
+      } else {    // Tercary color later and break the loop from here
         tercaryColor = swatch;
         tercaryContrast = contrastValue;
         break;
       }
-    } else if (contrastValue > secondaryContrast) {
+    } else if (contrastValue > secondaryContrast) {     // If contrast is below threshold, save the most contrasting colors just in case
       tercaryColor = secondaryColor;
       tercaryContrast = secondaryContrast;
       secondaryColor = swatch;
       secondaryContrast = contrastValue;
-    } else if (contrastValue > tercaryContrast) {
+    } else if (contrastValue > tercaryContrast) {       // If contrast is below threshold, save the most contrasting colors just in case
       tercaryColor = swatch;
       tercaryContrast = contrastValue;
     }
@@ -448,6 +456,7 @@ const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, dur
   </SmallPlayer>
 )
 
+// Mini player component
 const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor, tercaryColor) => (
   <MiniPlayer>
     <Track className="mini" color={primaryColor}>{track}</Track>
@@ -460,10 +469,11 @@ const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor
 export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, song }, dispatch) => {
   const { size } = options;
 
+  // When song changes, begin extracting artwork colors and pass them to state
   if (songChange) {
     const img = new Image();
     img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Theif.getColor(img), palette: Theif.getPalette(img) }});
-    img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });
+    img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });   // Fallback if unable to load image for colors
     img.src = song.localArtwork;
   }
 
