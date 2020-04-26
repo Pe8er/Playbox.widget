@@ -66,10 +66,11 @@ if playingState is false and application "Music" is running then
   end tell
 end if
 
+set artworkFilename to generateArtFilename(albumName & "-" & artistName & artExtension as string)
+
 -- Trigger extra changes if song changed
 if playingState and my songChanged() then
   -- Setup local artwork filename and location
-  set artworkFilename to generateArtFilename(albumName & "-" & artistName & artExtension as string)
   set cache_file to (mypath & "cache/" & artworkFilename as string)
 
   if my fileExists(cache_file) is false then    -- If artwork isn't cached, download and cache it

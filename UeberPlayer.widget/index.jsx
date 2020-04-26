@@ -1,6 +1,8 @@
 
 import { styled, run } from "uebersicht";
-const Vibrant = require('node-vibrant');
+import ColorTheif from "./lib/color-thief.mjs"
+
+const Theif = new ColorTheif();
 
 // CUSTOMIZATION
 
@@ -21,6 +23,7 @@ const Wrapper = styled("div")`
   box-shadow: ${props => props.mini ? "0" : "0 16px 32px 9px #0005"};
   opacity: ${props => props.playing ? 1 : 0};
   transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
 
   &::before {
     content: "";
@@ -121,8 +124,8 @@ const Information = styled("div")`
   padding: .5em .75em;
   line-height: 1.3;
   border-radius: 0 0 6px 6px;
-  -webkit-backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
-  backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
+  /* -webkit-backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
+  backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%); */
 
   > p {
     text-align: center;
@@ -161,7 +164,7 @@ const Progress = styled("div")`
     left: 0;
     bottom: 0;
     width: ${props => props.percent}%;
-    background: white;
+    background: ${props => props.color ? props.color : "white"};
     transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -183,6 +186,7 @@ const Progress = styled("div")`
 const Track = styled("p")`
   font-weight: bold;
   font-size: .7em;
+  color: ${props => props.color ? props.color : "inherit"};
 
   &.small {
     font-size: .65em;
@@ -203,16 +207,20 @@ const Artist = styled("p")`
   &.mini {
     font-size: 1em;
   }
+
+  color: ${props => props.color ? props.color : "inherit"};
 `
 
 const Album = styled("p")`
   font-size: .65em;
-  color: #e6e6e6;
+  /* color: #e6e6e6; */
   opacity: .75;
 
   &.small {
     font-size: .55em;
   }
+
+  color: ${props => props.color ? props.color : "inherit"};
 `
 
 // UEBER-SPECIFIC STUFF //
@@ -233,7 +241,10 @@ export const command = "osascript UeberPlayer.widget/getTrack.scpt";
 
 export const initialState = {
   playing: false,           // If currently playing a soundtrack
-  songChange: false,
+  songChange: false,        // If the song changed
+  primaryColor: undefined,
+  secondaryColor: undefined,
+  tercaryColor: undefined,
   song: {
     track: "",              // Name of soundtrack
     artist: "",             // Name of artist
@@ -250,8 +261,7 @@ export const initialState = {
 // Initialize function (remove old, cached files)
 export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +15 -delete`);
 
-// Update state
-export const updateState = ({ output, error }, previousState) => {
+const updateSongData = (output, error, previousState) => {
   // Check for errors
   if (error) {
     console.log("Something happened!? " + error);
@@ -286,6 +296,7 @@ export const updateState = ({ output, error }, previousState) => {
     return {
       ...previousState,
       playing,
+      songChange: true,
       song: {
         track,
         artist,
@@ -308,68 +319,147 @@ export const updateState = ({ output, error }, previousState) => {
   }
 }
 
+const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
+  const hex = x.toString(16)
+  return hex.length === 1 ? '0' + hex : hex
+}).join('')
+
+const luminance = (r, g, b) => {
+  const a = [r, g, b].map((x) => {
+    x /= 255;
+    return (x <= .03928) ? (x / 12.92) : (Math.pow( (x + 0.055) / 1.055, 2.4 ));
+  });
+  return a[0] * .2126 + a[1] * .7152 + a[2] * .0722;
+}
+
+const contrast = (lum1, lum2) => {
+  const lightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (lightest + .05) / (darkest + .05);
+}
+
+const updateColors = (theif, previousState) => {
+  console.log(theif);
+
+  const primaryColor = theif.dominantColor;
+  let secondaryColor, tercaryColor;
+
+  let secondaryContrast = 0, tercaryContrast = 0;
+  const primaryColorLum = luminance(primaryColor[0], primaryColor[1], primaryColor[2]);
+  for (const swatch of theif.palette) {
+    const swatchLum = luminance(swatch[0], swatch[1], swatch[2]);
+    const contrastValue = contrast(primaryColorLum, swatchLum);
+
+    if (contrastValue >= 2) {
+      if (secondaryContrast < 2) {
+        secondaryColor = swatch;
+        secondaryContrast = contrastValue;
+      } else {
+        tercaryColor = swatch;
+        tercaryContrast = contrastValue;
+        break;
+      }
+    } else if (contrastValue > secondaryContrast) {
+      tercaryColor = secondaryColor;
+      tercaryContrast = secondaryContrast;
+      secondaryColor = swatch;
+      secondaryContrast = contrastValue;
+    } else if (contrastValue > tercaryContrast) {
+      tercaryColor = swatch;
+      tercaryContrast = contrastValue;
+    }
+  }
+
+  return {
+    ...previousState,
+    songChange: false,
+    primaryColor: rgbToHex(primaryColor[0], primaryColor[1], primaryColor[2]),
+    secondaryColor: rgbToHex(secondaryColor[0], secondaryColor[1], secondaryColor[2]),
+    tercaryColor: rgbToHex(tercaryColor[0], tercaryColor[1], tercaryColor[2])
+  };
+}
+
+// Update state
+export const updateState = ({ type, output, error }, previousState) => {
+  switch (type) {
+    case 'UB/COMMAND_RAN': return updateSongData(output, error, previousState);
+    case 'UPDATE_COLORS': return updateColors(output, previousState);
+    default: {
+      console.error("Invalid dispatch type?");
+      return previousState;
+    }
+  }
+}
+
 // Big player component
-const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }) => (
+const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor) => (
   <BigPlayer>
     <ArtworkWrapper>
       <Artwork localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress percent={elapsed / duration * 100}/>
-      <Track className="small">{track}</Track>
-      <Artist className="small">{artist}</Artist>
-      <Album className="small">{album}</Album>
+      <Progress percent={elapsed / duration * 100} color={secondaryColor}/>
+      <Track className="small" color={secondaryColor}>{track}</Track>
+      <Artist className="small" color={tercaryColor}>{artist}</Artist>
+      <Album className="small" color={tercaryColor}>{album}</Album>
     </Information>
   </BigPlayer>
 );
 
 // Medium player component
-const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration }) => (
+const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor) => (
   <MediumPlayer>
     <ArtworkWrapper className="medium">
       <Artwork className="medium" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress percent={elapsed / duration * 100}/>
-      <Track>{track}</Track>
-      <Artist>{artist}</Artist>
+      <Progress percent={elapsed / duration * 100} color={secondaryColor}/>
+      <Track color={secondaryColor}>{track}</Track>
+      <Artist color={tercaryColor}>{artist}</Artist>
     </Information>
   </MediumPlayer>
 )
 
 // Small player component
-const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }) => (
+const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor) => (
   <SmallPlayer>
     <ArtworkWrapper className="small">
       <Artwork className="small" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information className="small">
-      <Track>{track}</Track>
-      <Artist>{artist}</Artist>
-      <Album>{album}</Album>
-      <Progress className="small" percent={elapsed / duration * 100}/>
+      <Track color={secondaryColor}>{track}</Track>
+      <Artist color={tercaryColor}>{artist}</Artist>
+      <Album color={tercaryColor}>{album}</Album>
+      <Progress className="small" percent={elapsed / duration * 100} color={secondaryColor}/>
     </Information>
   </SmallPlayer>
 )
 
 const mini = ({ track, artist, elapsed, duration }) => (
   <MiniPlayer>
-    <Track className="mini">{track}</Track>
-    <Artist className="mini">{artist}</Artist>
-    <Progress className="mini" percent={elapsed / duration * 100}/>
+    <Track className="mini" color={secondaryColor}>{track}</Track>
+    <Artist className="mini" color={tercaryColor}>{artist}</Artist>
+    <Progress className="mini" percent={elapsed / duration * 100} color={secondaryColor}/>
   </MiniPlayer>
 )
 
 // Render function
-export const render = ({ playing, song }) => {
+export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, song }, dispatch) => {
   const { size } = options;
 
+  if (songChange) {
+
+    const img = new Image();
+    img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Theif.getColor(img), palette: Theif.getPalette(img) }})
+    img.src = song.localArtwork;
+  }
+
   return (
-    <Wrapper playing={playing} mini={size === "mini"}>
-      {size === "big" && big(song)}
-      {size === "medium" && medium(song)}
-      {size === "small" && small(song)}
-      {size === "mini" && mini(song)}
+    <Wrapper playing={playing} mini={size === "mini"} bg={primaryColor}>
+      {size === "big" && big(song, secondaryColor, tercaryColor)}
+      {size === "medium" && medium(song, secondaryColor, tercaryColor)}
+      {size === "small" && small(song, secondaryColor, tercaryColor)}
+      {size === "mini" && mini(song, secondaryColor, tercaryColor)}
     </Wrapper>
   )
 };
