@@ -1,0 +1,27 @@
+{
+  "name": "ueberplayer",
+  "version": "1.0.0",
+  "description": "A music player for Ubersicht",
+  "main": "./UeberPlayer.widget/index.jsx",
+  "dependencies": {
+    "node-vibrant": "^3.1.5"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "ubersicht",
+    "music-player",
+    "spotify",
+    "apple-music"
+  ],
+  "author": "aCluelessDanny",
+  "license": ""
+}
