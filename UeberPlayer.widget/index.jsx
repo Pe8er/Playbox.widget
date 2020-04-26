@@ -1,5 +1,6 @@
 
-import { styled, run } from "uebersicht"
+import { styled, run } from "uebersicht";
+const Vibrant = require('node-vibrant');
 
 // CUSTOMIZATION
 
@@ -232,7 +233,8 @@ export const command = "osascript UeberPlayer.widget/getTrack.scpt";
 
 export const initialState = {
   playing: false,           // If currently playing a soundtrack
-  data: {
+  songChange: false,
+  song: {
     track: "",              // Name of soundtrack
     artist: "",             // Name of artist
     album: "",              // Name of album
@@ -278,14 +280,17 @@ export const updateState = ({ output, error }, previousState) => {
   // State controller
   if (!playing) {   // If player is paused
     return { ...previousState, playing };
-  } else if (track !== previousState.data.track || album !== previousState.data.album) {    // Song change
+  } else if (track !== previousState.song.track || album !== previousState.song.album) {    // Song change
+    const filepath = `UeberPlayer.widget/cache/${artworkFilename}`;
+
     return {
+      ...previousState,
       playing,
-      data: {
+      song: {
         track,
         artist,
         album,
-        localArtwork: `UeberPlayer.widget/cache/${artworkFilename}`,
+        localArtwork: filepath,
         onlineArtwork: artworkURL,
         duration,
         elapsed
@@ -293,9 +298,10 @@ export const updateState = ({ output, error }, previousState) => {
     }
   } else {  // Currently playing
     return {
+      ...previousState,
       playing,
-      data: {
-        ...previousState.data,
+      song: {
+        ...previousState.song,
         elapsed
       }
     };
@@ -355,15 +361,15 @@ const mini = ({ track, artist, elapsed, duration }) => (
 )
 
 // Render function
-export const render = ({ playing, data }) => {
+export const render = ({ playing, song }) => {
   const { size } = options;
 
   return (
     <Wrapper playing={playing} mini={size === "mini"}>
-      {size === "big" && big(data)}
-      {size === "medium" && medium(data)}
-      {size === "small" && small(data)}
-      {size === "mini" && mini(data)}
+      {size === "big" && big(song)}
+      {size === "medium" && medium(song)}
+      {size === "small" && small(song)}
+      {size === "mini" && mini(song)}
     </Wrapper>
   )
 };
