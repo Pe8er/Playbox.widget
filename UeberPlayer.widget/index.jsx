@@ -22,8 +22,8 @@ const Wrapper = styled("div")`
   overflow: ${props => props.mini ? "visible" : "hidden"};
   box-shadow: ${props => props.mini ? "0" : "0 16px 32px 9px #0005"};
   opacity: ${props => props.playing ? 1 : 0};
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 
   &::before {
     content: "";
@@ -36,6 +36,10 @@ const Wrapper = styled("div")`
     border-radius: 6px;
     backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
     z-index: -1;
+  }
+
+  * {
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 `;
 
@@ -163,7 +167,6 @@ const Progress = styled("div")`
     bottom: 0;
     width: ${props => props.percent}%;
     background: ${props => props.color ? props.color : "white"};
-    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   &.small {
@@ -197,6 +200,7 @@ const Track = styled("p")`
 
 const Artist = styled("p")`
   font-size: .7em;
+  color: ${props => props.color ? props.color : "inherit"};
 
   &.small {
     font-size: .65em;
@@ -205,20 +209,16 @@ const Artist = styled("p")`
   &.mini {
     font-size: 1em;
   }
-
-  color: ${props => props.color ? props.color : "inherit"};
 `
 
 const Album = styled("p")`
   font-size: .65em;
-  /* color: #e6e6e6; */
+  color: ${props => props.color ? props.color : "inherit"};
   opacity: .75;
 
   &.small {
     font-size: .55em;
   }
-
-  color: ${props => props.color ? props.color : "inherit"};
 `
 
 // UEBER-SPECIFIC STUFF //
