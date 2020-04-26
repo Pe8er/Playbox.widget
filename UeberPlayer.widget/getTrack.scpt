@@ -155,7 +155,9 @@ end generateArtFilename
 -- Extract artwork file from Spotify
 on extractSpotifyArt()
   set command to "curl " & artworkURL & " --create-dirs -o \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
-  do shell script command
+  try
+    do shell script command
+  end try
 end extractSpotifyArt
 
 -- Extract artwork from Apple Music

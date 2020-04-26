@@ -8,7 +8,7 @@ const Theif = new ColorTheif();
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "big",
+  size: "small",
 }
 
 
@@ -34,7 +34,6 @@ const Wrapper = styled("div")`
     bottom: 0;
     right: 0;
     border-radius: 6px;
-    -webkit-backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
     backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
     z-index: -1;
   }
@@ -124,8 +123,7 @@ const Information = styled("div")`
   padding: .5em .75em;
   line-height: 1.3;
   border-radius: 0 0 6px 6px;
-  /* -webkit-backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
-  backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%); */
+  /* backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%); */
 
   > p {
     text-align: center;
@@ -339,8 +337,6 @@ const contrast = (lum1, lum2) => {
 }
 
 const updateColors = (theif, previousState) => {
-  console.log(theif);
-
   const primaryColor = theif.dominantColor;
   let secondaryColor, tercaryColor;
 
@@ -384,6 +380,13 @@ export const updateState = ({ type, output, error }, previousState) => {
   switch (type) {
     case 'UB/COMMAND_RAN': return updateSongData(output, error, previousState);
     case 'UPDATE_COLORS': return updateColors(output, previousState);
+    case 'DEFAULT_COLORS': return {
+      ...previousState,
+      songChange: false,
+      primaryColor: undefined,
+      secondaryColor: undefined,
+      tercaryColor: undefined
+    }
     default: {
       console.error("Invalid dispatch type?");
       return previousState;
@@ -448,9 +451,9 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
   const { size } = options;
 
   if (songChange) {
-
     const img = new Image();
-    img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Theif.getColor(img), palette: Theif.getPalette(img) }})
+    img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Theif.getColor(img), palette: Theif.getPalette(img) }});
+    img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });
     img.src = song.localArtwork;
   }
 
