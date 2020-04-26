@@ -8,7 +8,7 @@ const Theif = new ColorTheif();
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "small",
+  size: "mini",
 }
 
 
@@ -18,16 +18,15 @@ const Wrapper = styled("div")`
   position: absolute;
   top: 20px;
   left: 20px;
-  border-radius: ${props => props.mini ? 0 : "6px"};
-  overflow: ${props => props.mini ? "visible" : "hidden"};
-  box-shadow: ${props => props.mini ? "0" : "0 16px 32px 9px #0005"};
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px 9px #0005;
   opacity: ${props => props.playing ? 1 : 0};
   background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 
   &::before {
     content: "";
-    display: ${props => props.mini ? "none" : "initial"};
     position: absolute;
     top: 0;
     left: 0;
@@ -42,6 +41,17 @@ const Wrapper = styled("div")`
     transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 `;
+
+const MiniWrapper = styled(Wrapper)`
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+  background: transparent;
+
+  &::before {
+    display: none;
+  }
+`
 
 const BigPlayer = styled("div")`
   display: flex;
@@ -70,7 +80,7 @@ const MiniPlayer = styled("div")`
   line-height: 1;
 
   * {
-    text-shadow: 0 2px 12px #0008;
+    text-shadow: 0px 0px 4px #0004, 0px 2px 12px #0004;
   }
 
   > * + * {
@@ -438,9 +448,9 @@ const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, dur
   </SmallPlayer>
 )
 
-const mini = ({ track, artist, elapsed, duration }) => (
+const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor, tercaryColor) => (
   <MiniPlayer>
-    <Track className="mini" color={secondaryColor}>{track}</Track>
+    <Track className="mini" color={primaryColor}>{track}</Track>
     <Artist className="mini" color={tercaryColor}>{artist}</Artist>
     <Progress className="mini" percent={elapsed / duration * 100} color={secondaryColor}/>
   </MiniPlayer>
@@ -457,12 +467,15 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
     img.src = song.localArtwork;
   }
 
-  return (
-    <Wrapper playing={playing} mini={size === "mini"} bg={primaryColor}>
+  return (size === "mini") ? (
+    <MiniWrapper playing={playing}>
+      {mini(song, primaryColor, secondaryColor, tercaryColor)}
+    </MiniWrapper>
+  ) : (
+    <Wrapper playing={playing} bg={primaryColor}>
       {size === "big" && big(song, secondaryColor, tercaryColor)}
       {size === "medium" && medium(song, secondaryColor, tercaryColor)}
       {size === "small" && small(song, secondaryColor, tercaryColor)}
-      {size === "mini" && mini(song, secondaryColor, tercaryColor)}
     </Wrapper>
   )
 };
