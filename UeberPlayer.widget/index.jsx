@@ -349,11 +349,11 @@ const contrast = (lum1, lum2) => {
 }
 
 // Get a fallback color for text over the primary color
-const getFallbackColor = (primaryColor, primaryColorLum, offset) => {
+const getFallbackColor = (color, primaryColorLum, offset) => {
   // Calculate HSL values first
-  const r = primaryColor[0] / 255;
-  const g = primaryColor[1] / 255;
-  const b = primaryColor[2] / 255;
+  const r = color[0] / 255;
+  const g = color[1] / 255;
+  const b = color[2] / 255;
   const cmax = Math.max(r, g, b);
   const cmin = Math.min(r, g, b);
   const chroma = cmax - cmin;
@@ -425,13 +425,13 @@ const updateColors = (thief, previousState) => {
     }
   }
 
-  // If colors selected still don't have enough contrast, get a fallback color based on the primary color
+  // If colors selected still don't have enough contrast, get a fallback color based on the background color
   // A contrast value below 1.75 seems like a good threshold
   if (secondaryContrast < 1.75) {
-    secondaryColor = getFallbackColor(primaryColor, primaryColorLum, .2);
+    secondaryColor = getFallbackColor(secondaryColor, primaryColorLum, .2);
   }
   if (tercaryContrast < 1.75) {
-    tercaryColor = getFallbackColor(primaryColor, primaryColorLum, .3);
+    tercaryColor = getFallbackColor(tercaryColor, primaryColorLum, .3);
   }
 
   return {
