@@ -8,7 +8,7 @@ const Theif = new ColorTheif();
 
 const options = {
   // Widget size!  --  big | medium | small | mini
-  size: "small",
+  size: "big",
 }
 
 
@@ -349,6 +349,48 @@ const contrast = (lum1, lum2) => {
   return (lightest + .05) / (darkest + .05);
 }
 
+// Get a fallback color for text over the primary color
+const getFallbackColor = (primaryColor, primaryColorLum, offset) => {
+  // Calculate HSL values first
+  const r = primaryColor[0] / 255;
+  const g = primaryColor[1] / 255;
+  const b = primaryColor[2] / 255;
+  const cmax = Math.max(r, g, b);
+  const cmin = Math.min(r, g, b);
+  const chroma = cmax - cmin;
+
+  let h = 0;
+  let s = 0;
+  let l = (cmax + cmin) / 2;
+  if (chroma !== 0) {
+    switch (cmax) {
+      case r: h = ((g - b) / chroma) % 6; break;
+      case g: h = ((b - r) / chroma) + 2; break;
+      case b: h = ((r - g) / chroma) + 4; break;
+    }
+    h = Math.round(h * 60) + (h < 0 ? 360 : 0);
+    s = Math.round(chroma / (1 - Math.abs(2 * l - 1)))
+  }
+
+  // Set a specified lightness value, depending on the primary color's luminance
+  l = (primaryColorLum <= 0.2) ? 1 - offset : offset;
+
+  // Convert the new HSL into RGB
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let newRgb;
+
+  if (h < 60) { newRgb = [c, x, 0]; }
+  else if (h < 120) { newRgb = [x, c, 0]; }
+  else if (h < 180) { newRgb = [0, c, x]; }
+  else if (h < 240) { newRgb = [0, x, c]; }
+  else if (h < 300) { newRgb = [x, 0, c]; }
+  else { newRgb = [c, 0, x]; }
+
+  return newRgb.map((v) => Math.round((v + m) * 255));
+}
+
 // Update adaptive colors
 const updateColors = (theif, previousState) => {
   const primaryColor = theif.dominantColor;
@@ -382,6 +424,15 @@ const updateColors = (theif, previousState) => {
       tercaryColor = swatch;
       tercaryContrast = contrastValue;
     }
+  }
+
+  // If colors selected still don't have enough contrast, get a fallback color based on the primary color
+  // A contrast value below 1.75 seems like a good threshold
+  if (secondaryContrast < 1.75) {
+    secondaryColor = getFallbackColor(primaryColor, primaryColorLum, .2);
+  }
+  if (tercaryContrast < 1.75) {
+    tercaryColor = getFallbackColor(primaryColor, primaryColorLum, .3);
   }
 
   return {
