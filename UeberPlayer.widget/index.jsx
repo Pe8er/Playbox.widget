@@ -1,28 +1,75 @@
 
 import { styled, run } from "uebersicht";
-import ColorThief from "./lib/color-thief.mjs"
+import ColorThief from "./lib/color-thief.mjs";
 
 const Thief = new ColorThief();
 
 // CUSTOMIZATION
 
 const options = {
-  // Widget size!  --  big | medium | small | mini
-  size: "big",
+  // Widget size!
+  size: "big",                    // big (default) | medium | small | mini
+
+  // Widget position!
+  // If you input a number, make sure it's enclosed as a string. E.g. -> "5", "-10",...
+  // Numbers with a negative sign (including -0) will be positioned from the opposite side
+  verticalPosition: "top",        // top (default) | center | bottom | <number> | -<number>
+  horizontalPosition: "left"      // left (default) | center | right | <number> | -<number>
 }
 
+export const className = `
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: white;
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    margin: 0;
+  }
+`;
+
 // EMOTION COMPONENTS
+const wrapperPos = ({ horizontal, vertical }) => {
+  if (horizontal === "center" && vertical === "center") {
+    return `
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    `
+  }
+
+  let hPos, vPos;
+  switch (horizontal) {
+    case "left": hPos = `left: 20px;`; break;
+    case "center": hPos = `left: 50%; transform: translateX(-50%);`; break;
+    case "right": hPos = `right: 20px;`; break;
+    default: hPos = horizontal.startsWith("-") ? `right: ${parseInt(horizontal) * -1}px;` : `left: ${horizontal}px;`; break;
+  }
+  switch (vertical) {
+    case "top": vPos = `top: 20px;`; break;
+    case "center": vPos = `top: 50%; transform: translateY(-50%);`; break;
+    case "bottom": vPos = `bottom: 20px;`; break;
+    default: vPos = vertical.startsWith("-") ? `bottom: ${parseInt(vertical) * -1}px;` : `top: ${vertical}px;`; break;
+  }
+
+  return `${hPos} ${vPos}`;
+}
 
 const Wrapper = styled("div")`
   position: absolute;
-  top: 20px;
-  left: 20px;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 16px 32px 9px #0005;
   opacity: ${props => props.playing ? 1 : 0};
   background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  ${wrapperPos}
 
   &::before {
     content: "";
@@ -41,11 +88,21 @@ const Wrapper = styled("div")`
   }
 `;
 
+const miniWrapperPos = ({ horizontal }) => {
+  switch (horizontal) {
+    case "left": return `text-align: left;`;
+    case "center": return `text-align: center;`;
+    case "right": return `text-align: right;`;
+    default: return horizontal.startsWith("-") ? `text-align: right;` : `text-align: left;`;
+  }
+}
+
 const MiniWrapper = styled(Wrapper)`
   border-radius: 0;
   overflow: visible;
   box-shadow: none;
   background: transparent;
+  ${miniWrapperPos}
 
   &::before {
     display: none;
@@ -232,18 +289,6 @@ const Album = styled("p")`
 `
 
 // UEBER-SPECIFIC STUFF //
-
-export const className = `
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  color: white;
-
-  * {
-    box-sizing: border-box;
-    padding: 0;
-    border: 0;
-    margin: 0;
-  }
-`;
 
 export const command = "osascript UeberPlayer.widget/getTrack.scpt";
 
@@ -518,7 +563,7 @@ const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor
 
 // Render function
 export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, song }, dispatch) => {
-  const { size } = options;
+  const { size, horizontalPosition, verticalPosition } = options;
 
   // When song changes, begin extracting artwork colors and pass them to state
   if (songChange) {
@@ -529,11 +574,11 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
   }
 
   return (size === "mini") ? (
-    <MiniWrapper playing={playing}>
+    <MiniWrapper playing={playing} horizontal={horizontalPosition} vertical={verticalPosition}>
       {mini(song, primaryColor, secondaryColor, tercaryColor)}
     </MiniWrapper>
   ) : (
-    <Wrapper playing={playing} bg={primaryColor}>
+    <Wrapper playing={playing} bg={primaryColor} horizontal={horizontalPosition} vertical={verticalPosition}>
       {size === "big" && big(song, secondaryColor, tercaryColor)}
       {size === "medium" && medium(song, secondaryColor, tercaryColor)}
       {size === "small" && small(song, secondaryColor, tercaryColor)}
