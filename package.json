@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "A music player for Ubersicht",
   "main": "./UeberPlayer.widget/index.jsx",
-  "dependencies": {
-    "colorthief": "^2.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "^4.0.2"
   },
