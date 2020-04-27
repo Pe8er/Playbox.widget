@@ -1,8 +1,8 @@
 
 import { styled, run } from "uebersicht";
-import ColorTheif from "./lib/color-thief.mjs"
+import ColorThief from "./lib/color-thief.mjs"
 
-const Theif = new ColorTheif();
+const Thief = new ColorThief();
 
 // CUSTOMIZATION
 
@@ -10,7 +10,6 @@ const options = {
   // Widget size!  --  big | medium | small | mini
   size: "big",
 }
-
 
 // EMOTION COMPONENTS
 
@@ -392,15 +391,15 @@ const getFallbackColor = (primaryColor, primaryColorLum, offset) => {
 }
 
 // Update adaptive colors
-const updateColors = (theif, previousState) => {
-  const primaryColor = theif.dominantColor;
+const updateColors = (thief, previousState) => {
+  const primaryColor = thief.dominantColor;
   let secondaryColor, tercaryColor;
 
   let secondaryContrast = 0, tercaryContrast = 0;
   const primaryColorLum = luminance(primaryColor[0], primaryColor[1], primaryColor[2]);
 
   // Find appropriate color choices in palette
-  for (const swatch of theif.palette) {
+  for (const swatch of thief.palette) {
     // Calculate the contrast between the background color and the tested color
     const swatchLum = luminance(swatch[0], swatch[1], swatch[2]);
     const contrastValue = contrast(primaryColorLum, swatchLum);
@@ -523,7 +522,7 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
   // When song changes, begin extracting artwork colors and pass them to state
   if (songChange) {
     const img = new Image();
-    img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Theif.getColor(img), palette: Theif.getPalette(img) }});
+    img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Thief.getColor(img), palette: Thief.getPalette(img) }});
     img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });   // Fallback if unable to load image for colors
     img.src = song.localArtwork;
   }
