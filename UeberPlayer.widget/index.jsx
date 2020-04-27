@@ -176,6 +176,7 @@ const Progress = styled("div")`
     bottom: 0;
     width: ${props => props.percent}%;
     background: ${props => props.color ? props.color : "white"};
+    transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   &.small {
