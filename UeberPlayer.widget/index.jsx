@@ -21,6 +21,8 @@ const options = {
   adaptiveColors: "opaque"          // -> opaque (default) | translucent | off
 }
 
+// ROOT STYLING //
+
 export const className = `
   position: absolute;
   top: 0;
@@ -38,7 +40,8 @@ export const className = `
   }
 `;
 
-// EMOTION COMPONENTS
+// EMOTION COMPONENTS //
+
 const wrapperPos = ({ horizontal, vertical }) => {
   if (horizontal === "center" && vertical === "center") {
     return `
@@ -520,7 +523,7 @@ const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, durat
       <Artwork localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress percent={elapsed / duration * 100} color={secondaryColor}/>
+      <Progress color={secondaryColor} percent={elapsed / duration * 100}/>
       <Track className="small" color={secondaryColor}>{track}</Track>
       <Artist className="small" color={tercaryColor}>{artist}</Artist>
       <Album className="small" color={tercaryColor}>{album}</Album>
@@ -535,7 +538,7 @@ const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration 
       <Artwork className="medium" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress percent={elapsed / duration * 100} color={secondaryColor}/>
+      <Progress color={secondaryColor} percent={elapsed / duration * 100}/>
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
     </Information>
@@ -552,17 +555,17 @@ const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, dur
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
       <Album color={tercaryColor}>{album}</Album>
-      <Progress className="small" percent={elapsed / duration * 100} color={secondaryColor}/>
+      <Progress color={secondaryColor} className="small" percent={elapsed / duration * 100}/>
     </Information>
   </SmallPlayer>
 )
 
 // Mini player component
-const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor, tercaryColor) => (
+const mini = ({ track, artist, elapsed, duration }, primaryColor) => (
   <MiniPlayer>
-    <Track className="mini" color={primaryColor}>{track}</Track>
-    <Artist className="mini" color={tercaryColor}>{artist}</Artist>
-    <Progress className="mini" percent={elapsed / duration * 100} color={secondaryColor}/>
+    <Track className="mini">{track}</Track>
+    <Artist className="mini">{artist}</Artist>
+    <Progress className="mini" color={primaryColor} percent={elapsed / duration * 100}/>
   </MiniPlayer>
 )
 
@@ -580,7 +583,7 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
 
   return (size === "mini") ? (
     <MiniWrapper playing={playing} horizontal={horizontalPosition} vertical={verticalPosition}>
-      {mini(song, primaryColor, secondaryColor, tercaryColor)}
+      {mini(song, primaryColor)}
     </MiniWrapper>
   ) : (
     <Wrapper playing={playing} bg={primaryColor} horizontal={horizontalPosition} vertical={verticalPosition}>
