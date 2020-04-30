@@ -7,14 +7,18 @@ const Thief = new ColorThief();
 // CUSTOMIZATION
 
 const options = {
-  // Widget size!
-  size: "big",                    // big (default) | medium | small | mini
+  /* Widget size! */
+  size: "big",                      // -> big (default) | medium | small | mini
 
-  // Widget position!
-  // If you input a number, make sure it's enclosed as a string. E.g. -> "5", "-10",...
-  // Numbers with a negative sign (including -0) will be positioned from the opposite side
-  verticalPosition: "top",        // top (default) | center | bottom | <number> | -<number>
-  horizontalPosition: "left"      // left (default) | center | right | <number> | -<number>
+  /* Widget position!
+  You can also input a number; just make sure it's enclosed in quotes. E.g. -> "5", "-10",...
+  Numbers with a negative sign (including -0) will be positioned from the opposite side */
+  verticalPosition: "top",          // -> top (default) | center | bottom | <number> | -<number>
+  horizontalPosition: "left",       // -> left (default) | center | right | <number> | -<number>
+
+  /* Adaptive colors!
+  Pick how you'd like to have your adaptive colors, or turn them off entirely */
+  adaptiveColors: "opaque"          // -> opaque (default) | translucent | off
 }
 
 export const className = `
@@ -67,7 +71,7 @@ const Wrapper = styled("div")`
   overflow: hidden;
   box-shadow: 0 16px 32px 9px #0005;
   opacity: ${props => props.playing ? 1 : 0};
-  background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
+  background: ${props => (props.bg !== undefined) ? props.bg + ((options.adaptiveColors === "translucent") ? "a0" : "") : "inherit"};
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   ${wrapperPos}
 
@@ -171,6 +175,7 @@ const ArtworkWrapper = styled("div")`
   }
 `
 
+// IDEA: Swap for img tag for onload property?
 const Artwork = styled("div")`
   width: 240px;
   height: 240px;
@@ -563,10 +568,10 @@ const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor
 
 // Render function
 export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, song }, dispatch) => {
-  const { size, horizontalPosition, verticalPosition } = options;
+  const { size, horizontalPosition, verticalPosition, adaptiveColors } = options;
 
   // When song changes, begin extracting artwork colors and pass them to state
-  if (songChange) {
+  if (adaptiveColors !== "off" && songChange) {
     const img = new Image();
     img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Thief.getColor(img), palette: Thief.getPalette(img) }});
     img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });   // Fallback if unable to load image for colors
