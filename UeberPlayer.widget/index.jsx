@@ -18,7 +18,12 @@ const options = {
 
   /* Adaptive colors!
   Pick how you'd like to have your adaptive colors, or turn them off entirely */
-  adaptiveColors: "opaque"          // -> opaque (default) | translucent | off
+  adaptiveColors: "opaque",         // -> opaque (default) | translucent | off
+
+  /* Dual-colored progress bar!
+  Choose if you want a dual-colored progress bar. The second color is applied on the "empty" part.
+  Note: The mini player will always have its "empty" coloring, but setting this to true adds some color to it */
+  dualProgressBar: false,            // -> true | false (default)
 }
 
 // ROOT STYLING //
@@ -231,7 +236,7 @@ const Progress = styled("div")`
   left: 0;
   right: 0;
   height: 2px;
-  background: transparent;
+  background: ${props => options.dualProgressBar && props.emptyColor ? (props.emptyColor + "80") : "transparent"};
 
   &::after {
     content: "";
@@ -240,7 +245,7 @@ const Progress = styled("div")`
     left: 0;
     bottom: 0;
     width: ${props => props.percent}%;
-    background: ${props => props.color ? props.color : "white"};
+    background: ${props => props.progressColor ? props.progressColor : "white"};
     transition: width .6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -253,7 +258,7 @@ const Progress = styled("div")`
     position: relative;
     height: 4px;
     border-radius: 2px;
-    background: #0002;
+    background: ${props => options.dualProgressBar && props.emptyColor ? (props.emptyColor + "60") : "#0002"};
     box-shadow: 0 3px 5px -1px #0003;
     overflow: hidden;
   }
@@ -523,7 +528,7 @@ const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, durat
       <Artwork localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress color={secondaryColor} percent={elapsed / duration * 100}/>
+      <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track className="small" color={secondaryColor}>{track}</Track>
       <Artist className="small" color={tercaryColor}>{artist}</Artist>
       <Album className="small" color={tercaryColor}>{album}</Album>
@@ -538,7 +543,7 @@ const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration 
       <Artwork className="medium" localArt={localArtwork} onlineArt={onlineArtwork}/>
     </ArtworkWrapper>
     <Information>
-      <Progress color={secondaryColor} percent={elapsed / duration * 100}/>
+      <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
     </Information>
@@ -555,17 +560,17 @@ const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, dur
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
       <Album color={tercaryColor}>{album}</Album>
-      <Progress color={secondaryColor} className="small" percent={elapsed / duration * 100}/>
+      <Progress progressColor={secondaryColor} emptyColor={tercaryColor} className="small" percent={elapsed / duration * 100}/>
     </Information>
   </SmallPlayer>
 )
 
 // Mini player component
-const mini = ({ track, artist, elapsed, duration }, primaryColor) => (
+const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor) => (
   <MiniPlayer>
     <Track className="mini">{track}</Track>
     <Artist className="mini">{artist}</Artist>
-    <Progress className="mini" color={primaryColor} percent={elapsed / duration * 100}/>
+    <Progress className="mini" progressColor={primaryColor} emptyColor={secondaryColor} percent={elapsed / duration * 100}/>
   </MiniPlayer>
 )
 
@@ -583,7 +588,7 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
 
   return (size === "mini") ? (
     <MiniWrapper playing={playing} horizontal={horizontalPosition} vertical={verticalPosition}>
-      {mini(song, primaryColor)}
+      {mini(song, primaryColor, secondaryColor)}
     </MiniWrapper>
   ) : (
     <Wrapper playing={playing} bg={primaryColor} horizontal={horizontalPosition} vertical={verticalPosition}>
