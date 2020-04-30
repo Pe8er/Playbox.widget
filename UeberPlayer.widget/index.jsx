@@ -13,18 +13,27 @@ const options = {
   /* Widget position!
   You can also input a number; just make sure it's enclosed in quotes. E.g. -> "5", "-10",...
   Numbers with a negative sign (including -0) will be positioned from the opposite side. */
-  verticalPosition: "top",          // -> top (default) | center | bottom | <number> | -<number>
-  horizontalPosition: "left",       // -> left (default) | center | right | <number> | -<number>
+  verticalPosition: "top",          // -> top (default) | center | bottom | "<number>" | "-<number>"
+  horizontalPosition: "left",       // -> left (default) | center | right | "<number>" | "-<number>"
 
   /* Adaptive colors!
   Pick how you'd like to have your adaptive colors, or turn them off entirely.
   Note: You might need to refresh the widget after changing this setting for it to take effect. */
-  adaptiveColors: "off",         // -> opaque (default) | translucent | off
+  adaptiveColors: "opaque",         // -> opaque (default) | translucent | off
 
   /* Dual-colored progress bar!
   Choose if you want a dual-colored progress bar. The second color is applied on the "empty" part.
-  Note: The mini player will always have its "empty" coloring, but setting this to true adds some color to it. */
-  dualProgressBar: false,            // -> true | false (default)
+  Note: The mini player will always have its "empty" coloring, though this adds some color to it. */
+  dualProgressBar: false,           // -> true | false (default)
+
+  /* Cache setting!
+  This widget caches artwork images for quicker loading and offline use. Because of this,
+  every time you load or refresh this widget, it checks the cache for any "old" artwork
+  (from albums you haven't played in a while) & deletes them.
+  This setting sets how many days old the artwork should be for it to deleted from the cache.
+  Example: Setting it to 5 -> Any artwork that's older than 5 days will be deleted.
+  Note: Setting it to 0 will mean the cache will empty every time the widget loads */
+  cacheMaxDays: 15                  // 15 (default) | <number>
 }
 
 // ROOT STYLING //
@@ -307,26 +316,26 @@ const Album = styled("p")`
 export const command = "osascript UeberPlayer.widget/getTrack.scpt";
 
 export const initialState = {
-  playing: false,           // If currently playing a soundtrack
-  songChange: false,        // If the song changed
-  primaryColor: undefined,
-  secondaryColor: undefined,
-  tercaryColor: undefined,
+  playing: false,               // If currently playing a soundtrack
+  songChange: false,            // If the song changed
+  primaryColor: undefined,      // Primary color from artwork
+  secondaryColor: undefined,    // Secondary color from artwork
+  tercaryColor: undefined,      // Tercary color from artwork
   song: {
-    track: "",              // Name of soundtrack
-    artist: "",             // Name of artist
-    album: "",              // Name of album
-    artwork: "",            // Locally stored url for album artwork
-    onlineArtwork: "",      // Online url for album artwork
-    duration: 0,            // Total duration of soundtrack in seconds
-    elapsed: 0              // Total time elapsed in seconds
+    track: "",                    // Name of soundtrack
+    artist: "",                   // Name of artist
+    album: "",                    // Name of album
+    artwork: "",                  // Locally stored url for album artwork
+    onlineArtwork: "",            // Online url for album artwork
+    duration: 0,                  // Total duration of soundtrack in seconds
+    elapsed: 0                    // Total time elapsed in seconds
   }
 };
 
 // FUNCTIONS //
 
 // Initialize function (remove old, cached files)
-export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +15 -delete`);
+export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete`);
 
 const updateSongData = (output, error, previousState) => {
   // Check for errors
