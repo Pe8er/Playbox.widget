@@ -12,17 +12,18 @@ const options = {
 
   /* Widget position!
   You can also input a number; just make sure it's enclosed in quotes. E.g. -> "5", "-10",...
-  Numbers with a negative sign (including -0) will be positioned from the opposite side */
+  Numbers with a negative sign (including -0) will be positioned from the opposite side. */
   verticalPosition: "top",          // -> top (default) | center | bottom | <number> | -<number>
   horizontalPosition: "left",       // -> left (default) | center | right | <number> | -<number>
 
   /* Adaptive colors!
-  Pick how you'd like to have your adaptive colors, or turn them off entirely */
-  adaptiveColors: "opaque",         // -> opaque (default) | translucent | off
+  Pick how you'd like to have your adaptive colors, or turn them off entirely.
+  Note: You might need to refresh the widget after changing this setting for it to take effect. */
+  adaptiveColors: "off",         // -> opaque (default) | translucent | off
 
   /* Dual-colored progress bar!
   Choose if you want a dual-colored progress bar. The second color is applied on the "empty" part.
-  Note: The mini player will always have its "empty" coloring, but setting this to true adds some color to it */
+  Note: The mini player will always have its "empty" coloring, but setting this to true adds some color to it. */
   dualProgressBar: false,            // -> true | false (default)
 }
 
@@ -206,7 +207,7 @@ const Information = styled("div")`
   padding: .5em .75em;
   line-height: 1.3;
   border-radius: 0 0 6px 6px;
-  /* backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%); */
+  backdrop-filter: ${options.adaptiveColors !== "opaque" ? "blur(8px) brightness(90%) contrast(80%) saturate(140%)" : "none"};
 
   > p {
     text-align: center;
