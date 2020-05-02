@@ -23,7 +23,7 @@ const options = {
   The default value is already a good starting point, but you can tweak it to your liking.
   - Note: Changing `minContrast` will only select different colors, not modify them.
   - Note: You might need to refresh the widget after changing this setting for it to take effect. */
-  adaptiveColors: "opaque",     // -> opaque (default) | translucent | off
+  adaptiveColors: true,     // -> true (default) | false
   minContrast: 2.6,             // -> 2.6 (default) | number
 
   /* Dual-colored progress bar!
@@ -94,7 +94,7 @@ const Wrapper = styled("div")`
   overflow: hidden;
   box-shadow: 0 16px 32px 9px #0005;
   opacity: ${props => props.playing ? 1 : 0};
-  background: ${props => (props.bg !== undefined) ? props.bg + ((options.adaptiveColors === "translucent") ? "a0" : "") : "inherit"};
+  background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   ${wrapperPos}
 
@@ -106,7 +106,6 @@ const Wrapper = styled("div")`
     bottom: 0;
     right: 0;
     border-radius: 6px;
-    backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
     z-index: -1;
   }
 
@@ -190,15 +189,18 @@ const ArtworkWrapper = styled("div")`
 
   &::before {
     position: absolute;
+    content: "";
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
-    background: #fff7;
+    border-radius: 6px 6px 0 0;
+    background: #fff1;
+    backdrop-filter: blur(8px) brightness(90%) contrast(80%) saturate(140%);
+    z-index: -1;
   }
 `
 
-// IDEA: Swap for img tag for onload property?
 const Artwork = styled("div")`
   width: 240px;
   height: 240px;
@@ -221,7 +223,7 @@ const Information = styled("div")`
   padding: .5em .75em;
   line-height: 1.3;
   border-radius: 0 0 6px 6px;
-  backdrop-filter: ${options.adaptiveColors !== "opaque" ? "blur(8px) brightness(90%) contrast(80%) saturate(140%)" : "none"};
+  backdrop-filter: ${options.adaptiveColors ? "blur(8px)" : "blur(8px) brightness(90%) contrast(80%) saturate(140%)"};
 
   > p {
     text-align: center;
@@ -273,7 +275,7 @@ const Progress = styled("div")`
     position: relative;
     height: 4px;
     border-radius: 2px;
-    background: ${props => options.dualProgressBar && props.emptyColor ? (props.emptyColor + "60") : "#0002"};
+    background: ${props => options.dualProgressBar && props.emptyColor ? (props.emptyColor + "60") : "#0005"};
     box-shadow: 0 3px 5px -1px #0003;
     overflow: hidden;
   }
@@ -533,10 +535,9 @@ export const updateState = ({ type, output, error }, previousState) => {
       secondaryColor: undefined,
       tercaryColor: undefined
     }
-    default: {
+    default:
       console.error("Invalid dispatch type?");
       return previousState;
-    }
   }
 }
 
@@ -598,7 +599,7 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
   const { size, horizontalPosition, verticalPosition, adaptiveColors } = options;
 
   // When song changes, begin extracting artwork colors and pass them to state
-  if (adaptiveColors !== "off" && songChange) {
+  if (adaptiveColors && songChange) {
     const img = new Image();
     img.onload = () => dispatch({ type: "UPDATE_COLORS", output: { dominantColor: Thief.getColor(img), palette: Thief.getPalette(img) }});
     img.onerror = () => dispatch({ type: "DEFAULT_COLORS" });   // Fallback if unable to load image for colors
