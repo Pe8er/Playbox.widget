@@ -405,7 +405,7 @@ const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
 const luminance = (r, g, b) => {
   const a = [r, g, b].map((x) => {
     x /= 255;
-    return (x <= .03928) ? (x / 12.92) : (Math.pow( (x + 0.055) / 1.055, 2.4 ));
+    return (x <= .03928) ? (x / 12.92) : (Math.pow((x + 0.055) / 1.055, 2.4));
   });
   return a[0] * .2126 + a[1] * .7152 + a[2] * .0722;
 }
@@ -467,15 +467,19 @@ const updateColors = (thief, previousState) => {
   let secondaryContrast = 0, tercaryContrast = 0;
   const primaryColorLum = luminance(primaryColor[0], primaryColor[1], primaryColor[2]);
 
+  // Prioritize colors that aren't "too black" (luminance < .002) nor "too white" (luminance > .9)
+  let palette = thief.palette.map(swatch => [...swatch, luminance(...swatch)]);
+  palette = palette.filter((s) => s[3] >= .002 && s[3] <= .9).concat(palette.filter((s) => s[3] < .002 || s[3] > .9));
+
   // Find appropriate color choices in palette
-  for (const swatch of thief.palette) {
+  for (const swatch of palette) {
     // Calculate the contrast between the background color and the tested color
     const swatchLum = luminance(swatch[0], swatch[1], swatch[2]);
     const contrastValue = contrast(primaryColorLum, swatchLum);
 
-    // If enough contrast (2 is a good number imo, though W3 recommends 4.5), use this color
-    if (contrastValue >= 2) {
-      if (secondaryContrast < 2) {    // Secondary color takes priority
+    // If enough contrast (2.6 is a good number imo, though W3 recommends up to 4.5), use this color
+    if (contrastValue >= 2.6) {
+      if (secondaryContrast < 2.6) {    // Secondary color takes priority
         secondaryColor = swatch;
         secondaryContrast = contrastValue;
       } else {    // Tercary color later and break the loop from here
