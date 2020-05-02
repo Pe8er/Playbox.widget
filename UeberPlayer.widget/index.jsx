@@ -8,23 +8,28 @@ const Thief = new ColorThief();
 
 const options = {
   /* Widget size! */
-  size: "big",                      // -> big (default) | medium | small | mini
+  size: "big",                  // -> big (default) | medium | small | mini
 
   /* Widget position!
-  You can also input a number; just make sure it's enclosed in quotes. E.g. -> "5", "-10",...
-  Numbers with a negative sign (including -0) will be positioned from the opposite side. */
-  verticalPosition: "top",          // -> top (default) | center | bottom | "<number>" | "-<number>"
-  horizontalPosition: "left",       // -> left (default) | center | right | "<number>" | "-<number>"
+  You can also input a number for pixel measurement
+  Numbers with a negative sign (including -0) will be positioned from the opposite side.
+  - Note: If you input a number, make sure it's enclosed in quotes -> "5", "-10", ... */
+  verticalPosition: "top",      // -> top (default) | center | bottom | "<number>" | "-<number>"
+  horizontalPosition: "left",   // -> left (default) | center | right | "<number>" | "-<number>"
 
   /* Adaptive colors!
-  Pick how you'd like to have your adaptive colors, or turn them off entirely.
-  Note: You might need to refresh the widget after changing this setting for it to take effect. */
-  adaptiveColors: "opaque",         // -> opaque (default) | translucent | off
+  Pick how you'd like to have your adaptive colors, or turn them off ePcomntirely.
+  You can also set the minimum contrast between adaptive colors when they're extracted.
+  The default value is already a good starting point, but you can tweak it to your liking.
+  - Note: Changing `minContrast` will only select different colors, not modify them.
+  - Note: You might need to refresh the widget after changing this setting for it to take effect. */
+  adaptiveColors: "opaque",     // -> opaque (default) | translucent | off
+  minContrast: 2.6,             // -> 2.6 (default) | number
 
   /* Dual-colored progress bar!
   Choose if you want a dual-colored progress bar. The second color is applied on the "empty" part.
-  Note: The mini player will always have its "empty" coloring, though this adds some color to it. */
-  dualProgressBar: false,           // -> true | false (default)
+  - Note: The mini player will always have its "empty" coloring, though this adds some color to it. */
+  dualProgressBar: false,       // -> true | false (default)
 
   /* Cache setting!
   This widget caches artwork images for quicker loading and offline use. Because of this,
@@ -32,8 +37,8 @@ const options = {
   (from albums you haven't played in a while) & deletes them.
   This setting sets how many days old the artwork should be for it to deleted from the cache.
   Example: Setting it to 5 -> Any artwork that's older than 5 days will be deleted.
-  Note: Setting it to 0 will mean the cache will empty every time the widget loads */
-  cacheMaxDays: 15                  // 15 (default) | <number>
+  - Note: Setting it to 0 will mean the cache will empty every time the widget loads */
+  cacheMaxDays: 15              // 15 (default) | <number>
 }
 
 // ROOT STYLING //
@@ -478,8 +483,8 @@ const updateColors = (thief, previousState) => {
     const contrastValue = contrast(primaryColorLum, swatchLum);
 
     // If enough contrast (2.6 is a good number imo, though W3 recommends up to 4.5), use this color
-    if (contrastValue >= 2.6) {
-      if (secondaryContrast < 2.6) {    // Secondary color takes priority
+    if (contrastValue >= options.minContrast) {
+      if (secondaryContrast < options.minContrast) {    // Secondary color takes priority
         secondaryColor = swatch;
         secondaryContrast = contrastValue;
       } else {    // Tercary color later and break the loop from here
