@@ -1,5 +1,6 @@
 {
   "name": "UeberPlayer",
   "description": "This widget shows information about the current song playing in Music or Spotify.",
-  "author": "Daniel Hernandez"
+  "author": "Daniel Hernandez",
+  "email": "tamdannyhdz@gmail.com"
 }
