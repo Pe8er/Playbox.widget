@@ -1,6 +1,6 @@
 
 # UeberPlayer
-An [Übersicht](http://tracesof.net/uebersicht/) widget that displays the currently playing song in a rather nice way. Forked from [Pe8er's Playbox](https://github.com/Pe8er/Playbox.widget), but rewritten with a bunch of new features and customization~
+An [Übersicht](http://tracesof.net/uebersicht/) widget that displays the currently playing song in a rather nice way. Forked from [Pe8er's Playbox](https://github.com/Pe8er/Playbox.widget), but rewritten with a bunch of new features and customization. I ended up liking this a lot to build it up again~
 
 ![screenshot](screenshot.png)
 
@@ -14,9 +14,33 @@ An [Übersicht](http://tracesof.net/uebersicht/) widget that displays the curren
 - Quite customizable
 
 ## Installation
+You can download the `UeberPlayer.widget.zip` file from the repo, clone the repo and download it from there, or grab the zip from the [latest release](https://github.com/acluelessdanny/ueberplayer/releases/latest).
+
+Drop the folder in your widgets folder, refresh, and profit.
 
 ## Settings
-Open `index.jsx` and there'll be an `options` object for customization. Mess around with those settings to your heart's content. Here's what you can change with them:
+Open `index.jsx` and there'll be an `options` object for customization. Mess around with those settings to your heart's content. Here's what it generally looks like and what you can change with them:
+
+```js
+const options = {
+  /* Widget size! */
+  size: "big",                  // -> big (default) | medium | small | mini
+
+  /* Widget position! */
+  verticalPosition: "top",      // -> top (default) | center | bottom | "<number>" | "-<number>"
+  horizontalPosition: "left",   // -> left (default) | center | right | "<number>" | "-<number>"
+
+  /* Adaptive colors! */
+  adaptiveColors: true,     // -> true (default) | false
+  minContrast: 2.6,             // -> 2.6 (default) | number
+
+  /* Dual-colored progress bar! */
+  dualProgressBar: false,       // -> true | false (default)
+
+  /* Cache setting! */
+  cacheMaxDays: 15              // 15 (default) | <number>
+}
+```
 
 ### Size
 Select from one of the 4 available sizes by setting `size`:
@@ -40,10 +64,11 @@ They also allow number values (enclosed as a string) for pixel measurements from
 ### Adaptive colors
 You can have adaptive colors based on the current track's artwork! If you're worried about performance, there's no need to worry because it performs this process only when the track changes (though you're free to disable it for whatever reason).
 
-You can also set the minimum contrast (`minContrast`) the text and background for a color to be used when extracting them. This _won't_ modify the colors selected, but rather the selection of colors (in other words, different values can yield different color combos). The default value should be good on its own, but you can tweak it to your needs. The higher the value, the more contrast it'll attempt to achieve (a good place to test and read up about it is with the [Contrast Ratio site](https://contrast-ratio.com/)).
+You can also set the minimum contrast (`minContrast`) the text and background must be for a color to be used when extracting them. This _won't_ modify the colors selected, but rather the selection of colors (in other words, different values can yield different color combos). The default value should be good on its own, but you can tweak it to your needs. The higher the value, the more contrast it'll attempt to achieve (a good place to test and read up about it is with the [Contrast Ratio site](https://contrast-ratio.com/)).
 
 - `adaptiveColors`: `true` (default), `false`
 - `minContrast`: `2.6` (default), `<number>`
+  - This can be any number, but 0-21 are the only values with actual effect, where 0 means equal colors and 21 is black and white. I made my tests and settled on **2.6**, but W3 recommends up to **4.5**. It's up to you~
 
 ![colors](images/colors.png)
 
