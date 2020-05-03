@@ -31,7 +31,7 @@ const options = {
   horizontalPosition: "left",   // -> left (default) | center | right | "<number>" | "-<number>"
 
   /* Adaptive colors! */
-  adaptiveColors: true,     // -> true (default) | false
+  adaptiveColors: true,         // -> true (default) | false
   minContrast: 2.6,             // -> 2.6 (default) | number
 
   /* Dual-colored progress bar! */

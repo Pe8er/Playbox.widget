@@ -1,6 +1,6 @@
 {
   "name": "UeberPlayer",
-  "description": "This widget shows information about the current song playing in Music or Spotify.",
+  "description": "A widget to elegantly display the currently playing song from Apple Music or Spotify",
   "author": "Daniel Hernandez",
   "email": "tamdannyhdz@gmail.com"
 }
