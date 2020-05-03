@@ -4,7 +4,7 @@ import ColorThief from "./lib/color-thief.mjs";
 
 const Thief = new ColorThief();
 
-// CUSTOMIZATION
+// CUSTOMIZATION (mess around here!)
 
 const options = {
   /* Widget size! */
@@ -18,9 +18,8 @@ const options = {
   horizontalPosition: "left",   // -> left (default) | center | right | "<number>" | "-<number>"
 
   /* Adaptive colors!
-  Pick how you'd like to have your adaptive colors, or turn them off ePcomntirely.
-  You can also set the minimum contrast between adaptive colors when they're extracted.
-  The default value is already a good starting point, but you can tweak it to your liking.
+  You can allow (or disallow) adaptive coloring on the player. You can also set the minimum contrast between adaptive colors when they're extracted.
+  The default value is already good on its own, but you can tweak it to your liking.
   - Note: Changing `minContrast` will only select different colors, not modify them.
   - Note: You might need to refresh the widget after changing this setting for it to take effect. */
   adaptiveColors: true,     // -> true (default) | false
@@ -36,7 +35,7 @@ const options = {
   every time you load or refresh this widget, it checks the cache for any "old" artwork
   (from albums you haven't played in a while) & deletes them.
   This setting sets how many days old the artwork should be for it to deleted from the cache.
-  Example: Setting it to 5 -> Any artwork that's older than 5 days will be deleted.
+  Example: Setting it to 5 -> Any album that hasn't been played for 5 days will be deleted.
   - Note: Setting it to 0 will mean the cache will empty every time the widget loads */
   cacheMaxDays: 15              // 15 (default) | <number>
 }
