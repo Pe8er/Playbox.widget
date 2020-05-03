@@ -5,38 +5,24 @@ import ColorThief from "./lib/color-thief.mjs";
 const Thief = new ColorThief();
 
 // CUSTOMIZATION (mess around here!)
+// For more details about these settings: please visit https://github.com/aCluelessDanny/UeberPlayer#settings
 
 const options = {
   /* Widget size! */
   size: "big",                  // -> big (default) | medium | small | mini
 
-  /* Widget position!
-  You can also input a number for pixel measurement
-  Numbers with a negative sign (including -0) will be positioned from the opposite side.
-  - Note: If you input a number, make sure it's enclosed in quotes -> "5", "-10", ... */
+  /* Widget position! */
   verticalPosition: "top",      // -> top (default) | center | bottom | "<number>" | "-<number>"
   horizontalPosition: "left",   // -> left (default) | center | right | "<number>" | "-<number>"
 
-  /* Adaptive colors!
-  You can allow (or disallow) adaptive coloring on the player. You can also set the minimum contrast between adaptive colors when they're extracted.
-  The default value is already good on its own, but you can tweak it to your liking.
-  - Note: Changing `minContrast` will only select different colors, not modify them.
-  - Note: You might need to refresh the widget after changing this setting for it to take effect. */
+  /* Adaptive colors! */
   adaptiveColors: true,     // -> true (default) | false
   minContrast: 2.6,             // -> 2.6 (default) | number
 
-  /* Dual-colored progress bar!
-  Choose if you want a dual-colored progress bar. The second color is applied on the "empty" part.
-  - Note: The mini player will always have its "empty" coloring, though this adds some color to it. */
+  /* Dual-colored progress bar! */
   dualProgressBar: false,       // -> true | false (default)
 
-  /* Cache setting!
-  This widget caches artwork images for quicker loading and offline use. Because of this,
-  every time you load or refresh this widget, it checks the cache for any "old" artwork
-  (from albums you haven't played in a while) & deletes them.
-  This setting sets how many days old the artwork should be for it to deleted from the cache.
-  Example: Setting it to 5 -> Any album that hasn't been played for 5 days will be deleted.
-  - Note: Setting it to 0 will mean the cache will empty every time the widget loads */
+  /* Cache setting! */
   cacheMaxDays: 15              // 15 (default) | <number>
 }
 
