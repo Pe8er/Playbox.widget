@@ -10,6 +10,7 @@ An [Übersicht](http://tracesof.net/uebersicht/) widget that displays the curren
 - Displays artwork (all done locally when possible for both platforms)
 - Temporarily caches artwork for offline use and quicker loading
 - Adaptive colors! (thanks to [Color Thief](https://lokeshdhakar.com/projects/color-thief/))
+- Hides itself when nothing is playing
 - Completely rewritten in JSX and streamlined Applescript
 - Quite customizable
 
@@ -56,11 +57,11 @@ Select from one of the 4 available sizes by setting `size`:
 
 They also allow number values (enclosed as a string) for pixel measurements from a screen's border. Using negative numbers (including -0) will position the player from the opposite side.
 
-- `verticalPosition`: `top` (default), `center`, `bottom`, `"<number>"`, `-<number>`
+- `verticalPosition`: `top` (default), `center`, `bottom`, `"<number>"`, `"-<number>"`
 - `horizontalPosition`: `left` (default), `center`, `right`, `"<number>"`, `"-<number>"`
   - If you're using the mini player, this setting will also affect its text alignment
 
-> Note: When using number values, make sure they're enclosed in quotes, like "5", "-10", etc.
+> Note: When using number values, make sure they're enclosed in quotes, like `"5"`, `"-10"`, etc.
 
 ### Adaptive colors
 You can have adaptive colors based on the current track's artwork! If you're worried about performance, there's no need to worry because it performs this process only when the track changes (though you're free to disable it for whatever reason).
