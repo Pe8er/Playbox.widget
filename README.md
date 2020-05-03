@@ -2,6 +2,8 @@
 # UeberPlayer
 An [Übersicht](http://tracesof.net/uebersicht/) widget that displays the currently playing song in a rather nice way. Forked from [Pe8er's Playbox](https://github.com/Pe8er/Playbox.widget), but rewritten with a bunch of new features and customization. I ended up liking this a lot to build it up again~
 
+> **IMPORTANT**: There's a bug in Spotify's Applescript API that doesn't give me all data of the currently playing song. Unfortunately, this causes missing text on the widget, & I'm currently waiting for Spotify to fix it. Read about it more [here](https://github.com/aCluelessDanny/UeberPlayer/issues/1)
+
 ![screenshot](screenshot.png)
 
 ## Features
