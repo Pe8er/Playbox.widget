@@ -58,6 +58,7 @@ They also allow number values (enclosed as a string) for pixel measurements from
 
 - `verticalPosition`: `top` (default), `center`, `bottom`, `"<number>"`, `-<number>`
 - `horizontalPosition`: `left` (default), `center`, `right`, `"<number>"`, `"-<number>"`
+  - If you're using the mini player, this setting will also affect its text alignment
 
 > Note: When using number values, make sure they're enclosed in quotes, like "5", "-10", etc.
 
