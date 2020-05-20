@@ -145,7 +145,7 @@ on generateArtFilename(str)
   set charsToCheck to characters of str
   set retList to {}
   repeat with i from 1 to count charsToCheck
-    if {charsToCheck's item i} is not in {" ", "\""} then
+    if {charsToCheck's item i} is not in {" ", "\"", "/", ",", ":", "?"} then
       set retList's end to charsToCheck's item i
     end if
   end repeat
