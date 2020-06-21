@@ -1,6 +1,6 @@
 {
   "name": "ueberplayer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A music player widget for Ubersicht",
   "main": "./UeberPlayer.widget/index.jsx",
   "dependencies": {},
