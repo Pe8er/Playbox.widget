@@ -3,6 +3,7 @@
 -- Global vars
 global playingState, appName, trackName, artistName, albumName, artworkURL, artworkFilename, trackDuration, mypath, artExtension
 
+set spotifyInstalled to false
 set playingState to false
 set appName to ""
 set trackName to ""
@@ -26,12 +27,25 @@ on error e
   error "Couldn't set up mypath!" & e
 end try
 
+-- Check if Spotify is installed
+try
+  tell application "Finder" to get application file id "com.spotify.client"
+  set spotifyInstalled to true
+on error
+  set spotifyInstalled to false
+end try
+
 -- Get Spotify track data if playing
-if application "Spotify" is running then
+if spotifyInstalled and application "Spotify" is running then
   tell application "Spotify"
-    if the player state is playing then
-      set playingState to true
-      set appName to "Spotify"
+    using terms from application "Music"
+      if player state is playing then
+        set playingState to true
+        set appName to "Spotify"
+      end if
+    end using terms from
+
+    if playingState is true then
       set trackName to the name of current track
       set artistName to the artist of current track
       set albumName to the album of current track
@@ -47,7 +61,7 @@ end if
 -- Get Apple Music track data if playing
 if playingState is false and application "Music" is running then
   tell application "Music"
-    if the player state is playing then
+    if player state is playing then
       set playingState to true
       set appName to "Music"
       set trackName to the name of current track
