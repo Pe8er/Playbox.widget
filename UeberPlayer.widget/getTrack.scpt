@@ -71,7 +71,7 @@ if playingState is false and application "Music" is running then
       set trackDuration to the duration of current track
       set timeElapsed to the player position
 
-      if format of item 1 of artworks in current track is Â«class PNG Â» then
+      if format of item 1 of artworks in current track is Çclass PNG È then
         set artExtension to ".png"
       else
         set artExtension to ".jpg"
