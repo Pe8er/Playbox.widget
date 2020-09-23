@@ -81,7 +81,7 @@ const Wrapper = styled("div")`
   overflow: hidden;
   box-shadow: 0 16px 32px 9px #0005;
   opacity: ${props => props.playing ? 1 : 0};
-  background: ${props => (props.bg !== undefined) ? props.bg : "inherit"};
+  background: ${props => (props.bg !== undefined) ? props.bg : "#0004"};
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   ${wrapperPos}
 
