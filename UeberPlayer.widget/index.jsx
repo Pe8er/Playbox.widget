@@ -307,7 +307,7 @@ const Album = styled("p")`
 
 // UEBER-SPECIFIC STUFF //
 
-export const command = "osascript UeberPlayer.widget/getTrack.scpt";
+export const command = "osascript UeberPlayer.widget/lib/getTrack.scpt";
 
 export const initialState = {
   playing: false,               // If currently playing a soundtrack
@@ -329,7 +329,7 @@ export const initialState = {
 // FUNCTIONS //
 
 // Initialize function (remove old, cached files)
-export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete`);
+export const init = () => run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete && osascript UeberPlayer.widget/lib/init.scpt`);
 
 const updateSongData = (output, error, previousState) => {
   // Check for errors
