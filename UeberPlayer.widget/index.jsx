@@ -302,8 +302,7 @@ export const initialState = {
   primaryColor: undefined,                          // Primary color from artwork
   secondaryColor: undefined,                        // Secondary color from artwork
   tercaryColor: undefined,                          // Tercary color from artwork
-  // artworkURL: "UeberPlayer.widget/default.png",     // Artwork source URL to be used
-  artwork: {
+  artwork: {                                          // Artwork source URL to be used
     art1: "UeberPlayer.widget/default.png",
     art2: "UeberPlayer.widget/default.png",
     alternate: true
@@ -346,7 +345,6 @@ export const updateState = ({ type, output, error }, previousState) => {
             art2: !alternate ? art2 : output.img.src,
             alternate: !alternate
           }
-          // artworkURL: output.img.src
         }
       }
     case 'DEFAULT_ART':
@@ -362,7 +360,6 @@ export const updateState = ({ type, output, error }, previousState) => {
           art2: !alternate ? art2 : "UeberPlayer.widget/default.png",
           alternate: !alternate
         }
-        // artworkURL: "UeberPlayer.widget/default.png"
       }
     default:
       console.error("Invalid dispatch type?");

@@ -79,7 +79,7 @@ You can also set the minimum contrast (`minContrast`) the text and background mu
 ### Progress bar
 You can choose to have a dual-colored progress bar. The second color is applied on the "empty" area.
 
-`dualProgressBar`: `true`, `false` (default)
+- `dualProgressBar`: `true`, `false` (default)
 
 ![dual-progress-bar](images/dualbar.png)
 
@@ -90,7 +90,7 @@ This widget caches artwork images for quicker loading & offline usage. To help m
 
 This setting sets how many days old the artwork must be for it to be deleted from the cache. For example, setting `5` means any album that hasn't been played for 5 days will be deleted. Setting it to `0` means it'll delete the cache completely every time it loads.
 
-`cacheMaxDays`: `15` (default), `<number>`
+- Update README`cacheMaxDays`: `15` (default), `<number>`
 
 ## Developing
 Just in case someone's curious on developing this as well, I have a `gulp dev` script here so it can streamline development a bit. Simply run `npm i` beforehand.

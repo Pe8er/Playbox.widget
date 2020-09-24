@@ -125,7 +125,6 @@ const getColors = ({ img }, previousState, options) => {
       art2: !alternate ? art2 : img.src,
       alternate: !alternate
     }
-    // artworkURL: img.src
   };
 }
 
