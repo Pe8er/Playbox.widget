@@ -1,13 +1,10 @@
 
 import { styled, run } from "uebersicht";
-import ColorThief from "./lib/color-thief.mjs";
-
 import getColors from './lib/getColors.js';
 
-const Thief = new ColorThief();
-
-// CUSTOMIZATION (mess around here!)
-// For more details about these settings: please visit https://github.com/aCluelessDanny/UeberPlayer#settings
+/* CUSTOMIZATION (mess around here!)
+You may need to refresh the widget after changing these settings
+For more details about these settings: please visit https://github.com/aCluelessDanny/UeberPlayer#settings */
 
 const options = {
   /* Widget size! */
@@ -28,7 +25,7 @@ const options = {
   cacheMaxDays: 15              // 15 (default) | <number>
 }
 
-// ROOT STYLING //
+/* ROOT STYLING */
 
 export const className = `
   position: absolute;
@@ -47,7 +44,7 @@ export const className = `
   }
 `;
 
-// EMOTION COMPONENTS //
+/* EMOTION COMPONENTS */
 
 const wrapperPos = ({ horizontal, vertical }) => {
   if (horizontal === "center" && vertical === "center") {
@@ -128,9 +125,7 @@ const BigPlayer = styled("div")`
   width: 240px;
 `;
 
-const MediumPlayer = styled("div")`
-  display: flex;
-  flex-direction: column;
+const MediumPlayer = styled(BigPlayer)`
   width: 180px;
 `
 
@@ -296,29 +291,29 @@ const Album = styled("p")`
   }
 `
 
-// UEBER-SPECIFIC STUFF //
+/* UEBER-SPECIFIC STUFF */
 
 export const command = "osascript UeberPlayer.widget/lib/getTrack.scpt";
 
 export const initialState = {
-  playing: false,               // If currently playing a soundtrack
-  songChange: false,            // If the song changed
-  primaryColor: undefined,      // Primary color from artwork
-  secondaryColor: undefined,    // Secondary color from artwork
-  tercaryColor: undefined,      // Tercary color from artwork
-  artworkURL: "UeberPlayer.widget/default.png",
+  playing: false,                                   // If currently playing a soundtrack
+  songChange: false,                                // If the song changed
+  primaryColor: undefined,                          // Primary color from artwork
+  secondaryColor: undefined,                        // Secondary color from artwork
+  tercaryColor: undefined,                          // Tercary color from artwork
+  artworkURL: "UeberPlayer.widget/default.png",     // Artwork source URL to be used
   song: {
-    track: "",                    // Name of soundtrack
-    artist: "",                   // Name of artist
-    album: "",                    // Name of album
-    artwork: "",                  // Locally stored url for album artwork
-    onlineArtwork: "",            // Online url for album artwork
-    duration: 0,                  // Total duration of soundtrack in seconds
-    elapsed: 0                    // Total time elapsed in seconds
+    track: "",                                      // Name of soundtrack
+    artist: "",                                     // Name of artist
+    album: "",                                      // Name of album
+    artwork: "",                                    // Locally stored url for album artwork
+    onlineArtwork: "",                              // Online url for album artwork
+    duration: 0,                                    // Total duration of soundtrack in seconds
+    elapsed: 0                                      // Total time elapsed in seconds
   }
 };
 
-// FUNCTIONS //
+/* FUNCTIONS */
 
 // Initialize function (remove old, cached files)
 export const init = () => {
@@ -339,7 +334,7 @@ export const updateState = ({ type, output, error }, previousState) => {
           primaryColor: undefined,
           secondaryColor: undefined,
           tercaryColor: undefined,
-          artworkURL: output.imgURL
+          artworkURL: output.img.src
         }
       }
     case 'DEFAULT_ART': return {
@@ -356,6 +351,7 @@ export const updateState = ({ type, output, error }, previousState) => {
   }
 }
 
+// Update song metadata
 const updateSongData = (output, error, previousState) => {
   // Check for errors
   if (error) {
@@ -385,8 +381,6 @@ const updateSongData = (output, error, previousState) => {
   if (!playing) {   // If player is paused
     return { ...previousState, playing };
   } else if (track !== previousState.song.track || album !== previousState.song.album) {    // Song change
-    const filepath = `UeberPlayer.widget/cache/${artworkFilename}`;
-
     return {
       ...previousState,
       playing,
@@ -395,7 +389,7 @@ const updateSongData = (output, error, previousState) => {
         track,
         artist,
         album,
-        localArtwork: filepath,
+        localArtwork: `UeberPlayer.widget/cache/${artworkFilename}`,
         onlineArtwork: artworkURL,
         duration,
         elapsed
@@ -418,33 +412,29 @@ const prepareArtwork = (dispatch, song) => {
   // Use a dummy image to test images beforehand
   const img = new Image();
 
-    img.onload = () => {    // When loading an image
-      dispatch({ type: "GET_ART", output: {
-        dominantColor: Thief.getColor(img),
-        palette: Thief.getPalette(img),
-        imgURL: img.src
-      }});
-    };
-    img.onerror = () => {
-      if (img.src !== song.onlineArtwork) {
-        img.src = song.onlineArtwork;
-      } else {
-        dispatch({ type: "DEFAULT_ART" });
-      }
+  // Attempts images in this order: Local -> Online -> Default
+  img.onload = () => { dispatch({ type: "GET_ART", output: { img }})};
+  img.onerror = () => {
+    if (img.src !== song.onlineArtwork) {
+      img.src = song.onlineArtwork;
+    } else {
+      dispatch({ type: "DEFAULT_ART" });
     }
+  }
 
-    img.src = song.localArtwork;
+  img.src = song.localArtwork;
 }
 
 // RENDERING //
-// Big player component
+// Artwork image
 const artwork = (wrapperClass, src) => (
   <ArtworkWrapper className={wrapperClass}>
     <Artwork id="artwork" src={src}/>
   </ArtworkWrapper>
 )
 
-const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+// Big player component
+const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
   <BigPlayer>
     {artwork("big", artworkURL)}
     <Information>
@@ -457,7 +447,7 @@ const big = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, durat
 );
 
 // Medium player component
-const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
   <MediumPlayer>
     {artwork("medium", artworkURL)}
     <Information>
@@ -469,7 +459,7 @@ const medium = ({ track, artist, localArtwork, onlineArtwork, elapsed, duration 
 )
 
 // Small player component
-const small = ({ track, artist, album, localArtwork, onlineArtwork, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+const small = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
   <SmallPlayer>
     {artwork("small", artworkURL)}
     <Information className="small">
@@ -492,13 +482,14 @@ const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor
 
 // Render function
 export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, artworkURL, song }, dispatch) => {
-  const { size, horizontalPosition, verticalPosition, adaptiveColors } = options;
+  const { size, horizontalPosition, verticalPosition } = options;
 
   // When song changes, prepare artwork
   if (songChange) {
     prepareArtwork(dispatch, song);
   }
 
+  // Render
   return (size === "mini") ? (
     <MiniWrapper playing={playing} horizontal={horizontalPosition} vertical={verticalPosition}>
       {mini(song, primaryColor, secondaryColor)}

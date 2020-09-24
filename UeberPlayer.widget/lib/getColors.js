@@ -1,4 +1,7 @@
 
+import ColorThief from "./color-thief.mjs";
+const Thief = new ColorThief();
+
 // Converts rgb to hex
 const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
   const hex = x.toString(16)
@@ -64,15 +67,14 @@ const getFallbackColor = (color, primaryColorLum, offset) => {
 }
 
 // Update adaptive colors
-const getColors = (thief, previousState, options) => {
-  const primaryColor = thief.dominantColor;
+const getColors = ({ img }, previousState, options) => {
+  const primaryColor = Thief.getColor(img);
   let secondaryColor, tercaryColor;
-
   let secondaryContrast = 0, tercaryContrast = 0;
   const primaryColorLum = luminance(primaryColor[0], primaryColor[1], primaryColor[2]);
 
   // Prioritize colors that aren't "too black" (luminance < .002) nor "too white" (luminance > .9)
-  let palette = thief.palette.map(swatch => [...swatch, luminance(...swatch)]);
+  let palette = Thief.getPalette(img).map(swatch => [...swatch, luminance(...swatch)]);
   palette = palette.filter((s) => s[3] >= .002 && s[3] <= .9).concat(palette.filter((s) => s[3] < .002 || s[3] > .9));
 
   // Find appropriate color choices in palette
@@ -117,7 +119,7 @@ const getColors = (thief, previousState, options) => {
     primaryColor: rgbToHex(primaryColor[0], primaryColor[1], primaryColor[2]),
     secondaryColor: rgbToHex(secondaryColor[0], secondaryColor[1], secondaryColor[2]),
     tercaryColor: rgbToHex(tercaryColor[0], tercaryColor[1], tercaryColor[2]),
-    artworkURL: thief.imgURL
+    artworkURL: img.src
   };
 }
 
