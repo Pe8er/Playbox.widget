@@ -10,20 +10,8 @@ on error e
 end try
 
 -- Use a .plist file to detect changes
+global plist_filepath
 set plist_filepath to (mypath & "currentTrack.plist" as string)
-
--- If .plist file doesn't exist, create it and return true (supposing this is a first-time run for the user)
-if fileExists(plist_filepath) is false then
-  tell application "System Events"
-    set the parent_dictionary to make new property list item with properties { kind:record }
-    set plist_file to make new property list file with properties { contents: parent_dictionary, name: plist_filepath }
-    tell property list items of plist_file
-      make new property list item at end with properties { kind: string, name: "album", value: "" }
-      make new property list item at end with properties { kind: string, name: "artist", value: "" }
-    end tell
-    return true
-  end tell
-end if
 
 -- Reset .plist file on start
 tell application "System Events"
@@ -33,19 +21,20 @@ tell application "System Events"
       set value of property list item "artist" to ""
     end tell
   on error e
-    error e
+    my createPlist()
   end try
 end tell
 
 --- -- - SUBROUTINES - -- ---
 
--- Simple function to return if a file exists or not
-on fileExists(f)
+-- Create plist file when it doesn't exist or on error
+on createPlist()
   tell application "System Events"
-    if exists file f then
-      return true
-    else
-      return false
-    end if
+    set the parent_dictionary to make new property list item with properties { kind:record }
+    set plist_file to make new property list file with properties { contents: parent_dictionary, name: plist_filepath }
+    tell property list items of plist_file
+      make new property list item at end with properties { kind: string, name: "album", value: "" }
+      make new property list item at end with properties { kind: string, name: "artist", value: "" }
+    end tell
   end tell
-end fileExists
+end createPlist

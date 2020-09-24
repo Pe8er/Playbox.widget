@@ -294,6 +294,11 @@ const Album = styled("p")`
 
 /* UEBER-SPECIFIC STUFF */
 
+// Initialize function (remove old, cached files)
+export const init = () => {
+  run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete && osascript UeberPlayer.widget/lib/init.scpt`);
+};
+
 export const command = "osascript UeberPlayer.widget/lib/getTrack.scpt";
 
 export const initialState = {
@@ -316,13 +321,6 @@ export const initialState = {
     duration: 0,                                    // Total duration of soundtrack in seconds
     elapsed: 0                                      // Total time elapsed in seconds
   }
-};
-
-/* FUNCTIONS */
-
-// Initialize function (remove old, cached files)
-export const init = () => {
-  run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete && osascript UeberPlayer.widget/lib/init.scpt`);
 };
 
 // Update state
@@ -366,6 +364,8 @@ export const updateState = ({ type, output, error }, previousState) => {
       return previousState;
   }
 }
+
+/* FUNCTIONS */
 
 // Update song metadata
 const updateSongData = (output, error, previousState) => {
