@@ -113,13 +113,19 @@ const getColors = ({ img }, previousState, options) => {
     tercaryColor = getFallbackColor(tercaryColor, primaryColorLum, .3);
   }
 
+  const { art1, art2, alternate } = previousState.artwork;
   return {
     ...previousState,
     songChange: false,
     primaryColor: rgbToHex(primaryColor[0], primaryColor[1], primaryColor[2]),
     secondaryColor: rgbToHex(secondaryColor[0], secondaryColor[1], secondaryColor[2]),
     tercaryColor: rgbToHex(tercaryColor[0], tercaryColor[1], tercaryColor[2]),
-    artworkURL: img.src
+    artwork: {
+      art1: alternate ? art1 : img.src,
+      art2: !alternate ? art2 : img.src,
+      alternate: !alternate
+    }
+    // artworkURL: img.src
   };
 }
 

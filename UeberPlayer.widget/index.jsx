@@ -189,6 +189,7 @@ const Artwork = styled("img")`
   right: 0;
   height: 100%;
   object-fit: cover;
+  opacity: ${props => props.show ? 1 : 0};
 `;
 
 const Information = styled("div")`
@@ -301,12 +302,17 @@ export const initialState = {
   primaryColor: undefined,                          // Primary color from artwork
   secondaryColor: undefined,                        // Secondary color from artwork
   tercaryColor: undefined,                          // Tercary color from artwork
-  artworkURL: "UeberPlayer.widget/default.png",     // Artwork source URL to be used
+  // artworkURL: "UeberPlayer.widget/default.png",     // Artwork source URL to be used
+  artwork: {
+    art1: "UeberPlayer.widget/default.png",
+    art2: "UeberPlayer.widget/default.png",
+    alternate: true
+  },
   song: {
     track: "",                                      // Name of soundtrack
     artist: "",                                     // Name of artist
     album: "",                                      // Name of album
-    artwork: "",                                    // Locally stored url for album artwork
+    localArtwork: "",                               // Locally stored url for album artwork
     onlineArtwork: "",                              // Online url for album artwork
     duration: 0,                                    // Total duration of soundtrack in seconds
     elapsed: 0                                      // Total time elapsed in seconds
@@ -328,23 +334,36 @@ export const updateState = ({ type, output, error }, previousState) => {
       if (options.adaptiveColors) {
         return getColors(output, previousState, options);
       } else {
+        const { art1, art2, alternate } = previousState.artwork;
         return {
           ...previousState,
           songChange: false,
           primaryColor: undefined,
           secondaryColor: undefined,
           tercaryColor: undefined,
-          artworkURL: output.img.src
+          artwork: {
+            art1: alternate ? art1 : output.img.src,
+            art2: !alternate ? art2 : output.img.src,
+            alternate: !alternate
+          }
+          // artworkURL: output.img.src
         }
       }
-    case 'DEFAULT_ART': return {
-      ...previousState,
-      songChange: false,
-      primaryColor: undefined,
-      secondaryColor: undefined,
-      tercaryColor: undefined,
-      artworkURL: "UeberPlayer.widget/default.png"
-    }
+    case 'DEFAULT_ART':
+      const { art1, art2, alternate } = previousState.artwork;
+      return {
+        ...previousState,
+        songChange: false,
+        primaryColor: undefined,
+        secondaryColor: undefined,
+        tercaryColor: undefined,
+        artwork: {
+          art1: alternate ? art1 : "UeberPlayer.widget/default.png",
+          art2: !alternate ? art2 : "UeberPlayer.widget/default.png",
+          alternate: !alternate
+        }
+        // artworkURL: "UeberPlayer.widget/default.png"
+      }
     default:
       console.error("Invalid dispatch type?");
       return previousState;
@@ -427,16 +446,17 @@ const prepareArtwork = (dispatch, song) => {
 
 // RENDERING //
 // Artwork image
-const artwork = (wrapperClass, src) => (
+const artworkImage = (wrapperClass, { art1, art2, alternate }) => (
   <ArtworkWrapper className={wrapperClass}>
-    <Artwork id="artwork" src={src}/>
+    <Artwork src={art1} show={alternate}/>
+    <Artwork src={art2} show={!alternate}/>
   </ArtworkWrapper>
 )
 
 // Big player component
-const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
   <BigPlayer>
-    {artwork("big", artworkURL)}
+    {artworkImage("big", artwork)}
     <Information>
       <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track className="small" color={secondaryColor}>{track}</Track>
@@ -447,9 +467,9 @@ const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercar
 );
 
 // Medium player component
-const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
   <MediumPlayer>
-    {artwork("medium", artworkURL)}
+    {artworkImage("medium", artwork)}
     <Information>
       <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track color={secondaryColor}>{track}</Track>
@@ -459,9 +479,9 @@ const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryCol
 )
 
 // Small player component
-const small = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artworkURL) => (
+const small = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
   <SmallPlayer>
-    {artwork("small", artworkURL)}
+    {artworkImage("small", artwork)}
     <Information className="small">
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
@@ -481,7 +501,7 @@ const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor
 )
 
 // Render function
-export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, artworkURL, song }, dispatch) => {
+export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, artwork, song }, dispatch) => {
   const { size, horizontalPosition, verticalPosition } = options;
 
   // When song changes, prepare artwork
@@ -496,9 +516,9 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
     </MiniWrapper>
   ) : (
     <Wrapper playing={playing} bg={primaryColor} horizontal={horizontalPosition} vertical={verticalPosition}>
-      {size === "big" && big(song, secondaryColor, tercaryColor, artworkURL)}
-      {size === "medium" && medium(song, secondaryColor, tercaryColor, artworkURL)}
-      {size === "small" && small(song, secondaryColor, tercaryColor, artworkURL)}
+      {size === "big" && big(song, secondaryColor, tercaryColor, artwork)}
+      {size === "medium" && medium(song, secondaryColor, tercaryColor, artwork)}
+      {size === "small" && small(song, secondaryColor, tercaryColor, artwork)}
     </Wrapper>
   )
 };
