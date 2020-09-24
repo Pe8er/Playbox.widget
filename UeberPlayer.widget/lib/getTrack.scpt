@@ -1,7 +1,9 @@
 #!/usr/bin/osascript
 
+--- -- ~ PRE-SETUP ~ -- ---
+
 -- Global vars
-global playingState, appName, trackName, artistName, albumName, artworkURL, artworkFilename, trackDuration, mypath, artExtension
+global playingState, appName, trackName, artistName, albumName, artworkURL, artworkFilename, trackDuration, mypath, artExtension, plist_filepath
 
 set spotifyInstalled to false
 set playingState to false
@@ -16,7 +18,6 @@ set timeElapsed to 0
 
 set artExtension to ""
 
---- -- - MAIN ROUTINE - -- ---
 -- Setup `mypath`
 try
   set mypath to POSIX path of (path to me)
@@ -26,6 +27,11 @@ try
 on error e
   error "Couldn't set up mypath!" & e
 end try
+
+-- Use a .plist file to detect changes
+set plist_filepath to (mypath & "currentTrack.plist" as string)
+
+--- -- - MAIN ROUTINE - -- ---
 
 -- Check if Spotify is installed
 try
@@ -87,15 +93,18 @@ if playingState and my songChanged() then
   -- Setup local artwork filename and location
   set cache_file to (mypath & "cache/" & artworkFilename as string)
 
-  if my fileExists(cache_file) is false then    -- If artwork isn't cached, download and cache it
-    if appName is "Spotify" then
-      my extractSpotifyArt()
-    else if appName is "Music" then
-      my extractMusicArt()
-    end if
-  else    -- Else, touch the cached file to keep it "fresh"
+  -- Download artwork if necessary, touch it otherwise
+  if my fileExists(cache_file) then
     set command to "touch \"./UeberPlayer.widget/cache/" & artworkFilename & "\""
     do shell script command
+  else
+    try
+      if appName is "Spotify" then
+        my extractSpotifyArt()
+      else if appName is "Music" then
+        my extractMusicArt()
+      end if
+    end try
   end if
 end if
 
@@ -110,9 +119,6 @@ return retStr
 
 -- Function to determine if a song changed happened
 on songChanged()
-  -- Use a .plist file to detect changes
-  set plist_filepath to (mypath & "currentTrack.plist" as string)
-
   tell application "System Events"
     try
       tell property list file plist_filepath

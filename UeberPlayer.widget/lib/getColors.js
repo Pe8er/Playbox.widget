@@ -116,7 +116,8 @@ const getColors = (thief, previousState, options) => {
     songChange: false,
     primaryColor: rgbToHex(primaryColor[0], primaryColor[1], primaryColor[2]),
     secondaryColor: rgbToHex(secondaryColor[0], secondaryColor[1], secondaryColor[2]),
-    tercaryColor: rgbToHex(tercaryColor[0], tercaryColor[1], tercaryColor[2])
+    tercaryColor: rgbToHex(tercaryColor[0], tercaryColor[1], tercaryColor[2]),
+    artworkURL: thief.imgURL
   };
 }
 

@@ -18,8 +18,8 @@ if fileExists(plist_filepath) is false then
     set the parent_dictionary to make new property list item with properties { kind:record }
     set plist_file to make new property list file with properties { contents: parent_dictionary, name: plist_filepath }
     tell property list items of plist_file
-      make new property list item at end with properties { kind: string, name: "album", value: albumName }
-      make new property list item at end with properties { kind: string, name: "artist", value: artistName }
+      make new property list item at end with properties { kind: string, name: "album", value: "" }
+      make new property list item at end with properties { kind: string, name: "artist", value: "" }
     end tell
     return true
   end tell
