@@ -1,6 +1,7 @@
 
 import { styled, run } from "uebersicht";
 import getColors from './lib/getColors.js';
+const _version = '1.1.1';
 
 /* CUSTOMIZATION (mess around here!)
 You may need to refresh the widget after changing these settings
@@ -22,7 +23,10 @@ const options = {
   dualProgressBar: false,       // -> true | false (default)
 
   /* Cache setting! */
-  cacheMaxDays: 15              // 15 (default) | <number>
+  cacheMaxDays: 15,             // -> 15 (default) | <number>
+
+  /* Check for updates */
+  checkForUpdates: true         // -> true (default) | false
 }
 
 /* ROOT STYLING */
@@ -292,11 +296,39 @@ const Album = styled("p")`
   }
 `
 
+const UpdateNotif = styled("div")`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  padding: 1em;
+  min-height: 30%;
+  background-image: linear-gradient(to bottom, #000b, transparent);
+`
+
+const UpdateText = styled("p")`
+  font-size: .7em;
+  text-align: center !important;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`
+
 /* UEBER-SPECIFIC STUFF */
 
-// Initialize function (remove old, cached files)
-export const init = () => {
+export const init = (dispatch) => {
+  // Initialize and clear cache of old artwork
   run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete && osascript UeberPlayer.widget/lib/init.scpt`);
+  // Check for updates when enabled
+  if (options.checkForUpdates) {
+    checkForUpdate(dispatch);
+    setInterval(checkForUpdate, 86400000, dispatch);
+  }
 };
 
 export const command = "osascript UeberPlayer.widget/lib/getTrack.scpt";
@@ -320,13 +352,15 @@ export const initialState = {
     onlineArtwork: "",                              // Online url for album artwork
     duration: 0,                                    // Total duration of soundtrack in seconds
     elapsed: 0                                      // Total time elapsed in seconds
-  }
+  },
+  updateAvailable: false                            // Flag for when an update's available
 };
 
 // Update state
 export const updateState = ({ type, output, error }, previousState) => {
   switch (type) {
-    case 'UB/COMMAND_RAN': return updateSongData(output, error, previousState);
+    case 'UB/COMMAND_RAN':
+      return updateSongData(output, error, previousState);
     case 'GET_ART':
       if (options.adaptiveColors) {
         return getColors(output, previousState, options);
@@ -359,6 +393,8 @@ export const updateState = ({ type, output, error }, previousState) => {
           alternate: !alternate
         }
       }
+    case 'UPDATE_AVAILABLE':
+      return { ...previousState, updateAvailable: true }
     default:
       console.error("Invalid dispatch type?");
       return previousState;
@@ -366,6 +402,18 @@ export const updateState = ({ type, output, error }, previousState) => {
 }
 
 /* FUNCTIONS */
+
+// Check for update
+const checkForUpdate = async (dispatch) => {
+  let resp = await fetch('https://raw.githubusercontent.com/aCluelessDanny/UeberPlayer/dev/widget.json');
+  if (!resp.ok) { throw Error("Unable to check for update!") }
+
+  let data = await resp.json();
+  if (_version !== data.version) {
+    console.log(`There's an update available! -> ${data.version}`);
+    dispatch({ type: "UPDATE_AVAILABLE" });
+  }
+}
 
 // Update song metadata
 const updateSongData = (output, error, previousState) => {
@@ -450,10 +498,22 @@ const artworkImage = (wrapperClass, { art1, art2, alternate }) => (
   </ArtworkWrapper>
 )
 
+// Update notification component
+const updateNotif = ( text, color = 'inherit' ) => {
+  return text ? (
+    <UpdateText style={{ color }}><a href="https://raw.githubusercontent.com/aCluelessDanny/UeberPlayer/master/UeberPlayer.widget.zip">An update is available!</a></UpdateText>
+  ) : (
+    <UpdateNotif>
+      <UpdateText><a href="https://raw.githubusercontent.com/aCluelessDanny/UeberPlayer/master/UeberPlayer.widget.zip">An update is available!</a></UpdateText>
+    </UpdateNotif>
+  )
+}
+
 // Big player component
-const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
+const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork, updateAvailable) => (
   <BigPlayer>
     {artworkImage("big", artwork)}
+    {updateAvailable && updateNotif(false)}
     <Information>
       <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track className="small" color={secondaryColor}>{track}</Track>
@@ -464,9 +524,10 @@ const big = ({ track, artist, album, elapsed, duration }, secondaryColor, tercar
 );
 
 // Medium player component
-const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
+const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryColor, artwork, updateAvailable) => (
   <MediumPlayer>
     {artworkImage("medium", artwork)}
+    {updateAvailable && updateNotif(false)}
     <Information>
       <Progress progressColor={secondaryColor} emptyColor={tercaryColor} percent={elapsed / duration * 100}/>
       <Track color={secondaryColor}>{track}</Track>
@@ -476,29 +537,31 @@ const medium = ({ track, artist, elapsed, duration }, secondaryColor, tercaryCol
 )
 
 // Small player component
-const small = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork) => (
+const small = ({ track, artist, album, elapsed, duration }, secondaryColor, tercaryColor, artwork, updateAvailable) => (
   <SmallPlayer>
     {artworkImage("small", artwork)}
     <Information className="small">
       <Track color={secondaryColor}>{track}</Track>
       <Artist color={tercaryColor}>{artist}</Artist>
       <Album color={tercaryColor}>{album}</Album>
+      {updateAvailable && updateNotif(true, secondaryColor)}
       <Progress progressColor={secondaryColor} emptyColor={tercaryColor} className="small" percent={elapsed / duration * 100}/>
     </Information>
   </SmallPlayer>
 )
 
 // Mini player component
-const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor) => (
+const mini = ({ track, artist, elapsed, duration }, primaryColor, secondaryColor, updateAvailable) => (
   <MiniPlayer>
     <Track className="mini">{track}</Track>
     <Artist className="mini">{artist}</Artist>
     <Progress className="mini" progressColor={primaryColor} emptyColor={secondaryColor} percent={elapsed / duration * 100}/>
+    {updateAvailable && updateNotif(true)}
   </MiniPlayer>
 )
 
 // Render function
-export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, artwork, song }, dispatch) => {
+export const render = ({ playing, songChange, primaryColor, secondaryColor, tercaryColor, artwork, song, updateAvailable }, dispatch) => {
   const { size, horizontalPosition, verticalPosition } = options;
 
   // When song changes, prepare artwork
@@ -509,13 +572,13 @@ export const render = ({ playing, songChange, primaryColor, secondaryColor, terc
   // Render
   return (size === "mini") ? (
     <MiniWrapper playing={playing} horizontal={horizontalPosition} vertical={verticalPosition}>
-      {mini(song, primaryColor, secondaryColor)}
+      {mini(song, primaryColor, secondaryColor, updateAvailable)}
     </MiniWrapper>
   ) : (
     <Wrapper playing={playing} bg={primaryColor} horizontal={horizontalPosition} vertical={verticalPosition}>
-      {size === "big" && big(song, secondaryColor, tercaryColor, artwork)}
-      {size === "medium" && medium(song, secondaryColor, tercaryColor, artwork)}
-      {size === "small" && small(song, secondaryColor, tercaryColor, artwork)}
+      {size === "big" && big(song, secondaryColor, tercaryColor, artwork, updateAvailable)}
+      {size === "medium" && medium(song, secondaryColor, tercaryColor, artwork, updateAvailable)}
+      {size === "small" && small(song, secondaryColor, tercaryColor, artwork, updateAvailable)}
     </Wrapper>
   )
 };
