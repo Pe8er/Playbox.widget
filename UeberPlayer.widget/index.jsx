@@ -431,7 +431,7 @@ const prepareArtwork = (dispatch, song) => {
   // Attempts images in this order: Local -> Online -> Default
   img.onload = () => { dispatch({ type: "GET_ART", output: { img }})};
   img.onerror = () => {
-    if (img.src !== song.onlineArtwork) {
+    if (song.onlineArtwork !== "missing value" && img.src !== song.onlineArtwork) {
       img.src = song.onlineArtwork;
     } else {
       dispatch({ type: "DEFAULT_ART" });
