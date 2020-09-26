@@ -405,7 +405,7 @@ export const updateState = ({ type, output, error }, previousState) => {
 
 // Check for update
 const checkForUpdate = async (dispatch) => {
-  let resp = await fetch('https://raw.githubusercontent.com/aCluelessDanny/UeberPlayer/dev/widget.json');
+  let resp = await fetch('https://raw.githubusercontent.com/aCluelessDanny/UeberPlayer/master/widget.json');
   if (!resp.ok) { throw Error("Unable to check for update!") }
 
   let data = await resp.json();
