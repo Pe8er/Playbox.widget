@@ -39,7 +39,10 @@ const options = {
   dualProgressBar: false,       // -> true | false (default)
 
   /* Cache setting! */
-  cacheMaxDays: 15              // 15 (default) | <number>
+  cacheMaxDays: 15,             // -> 15 (default) | <number>
+
+  /* Check for updates */
+  checkForUpdates: true         // -> true (default) | false
 }
 ```
 
@@ -90,7 +93,16 @@ This widget caches artwork images for quicker loading & offline usage. To help m
 
 This setting sets how many days old the artwork must be for it to be deleted from the cache. For example, setting `5` means any album that hasn't been played for 5 days will be deleted. Setting it to `0` means it'll delete the cache completely every time it loads.
 
-- Update README`cacheMaxDays`: `15` (default), `<number>`
+- `cacheMaxDays`: `15` (default), `<number>`
+
+### Update checking
+This widget can also periodically check for any available updates if there are any present. When `checkForUpdates` is true, it will check for updates on startup and then subsequently every 24 hours. If an update is available, a small text will appear, and upon clicking it, it will open the download to the latest widget. If you wish to disable this check and display, simple turn off `checkForUpdates`.
+
+![update](images/update.png)
+
+- `checkForUpdates`: `true` (default), `false`
+
+> **NOTE**: The link in the text is only clickable if you've enabled the `Enable interaction` option within Ubersicht. It can still serve as an update notification if you desire to leave the option off though.
 
 ## Developing
 Just in case someone's curious on developing this as well, I have a `gulp dev` script here so it can streamline development a bit. Simply run `npm i` beforehand.
