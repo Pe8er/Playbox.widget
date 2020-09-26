@@ -1,7 +1,7 @@
 
 import { styled, run } from "uebersicht";
 import getColors from './lib/getColors.js';
-const _version = '1.1.1';
+const _version = '1.2.0';
 
 /* CUSTOMIZATION (mess around here!)
 You may need to refresh the widget after changing these settings
