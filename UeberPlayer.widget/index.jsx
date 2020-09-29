@@ -323,7 +323,11 @@ const UpdateText = styled("p")`
 
 export const init = (dispatch) => {
   // Initialize and clear cache of old artwork
-  run(`find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete && osascript UeberPlayer.widget/lib/init.scpt`);
+  run(
+    `mkdir -p UeberPlayer.widget/cache &&\
+    find UeberPlayer.widget/cache -mindepth 1 -type f -mtime +${options.cacheMaxDays} -delete &&\
+    osascript UeberPlayer.widget/lib/init.scpt`
+  );
   // Check for updates when enabled
   if (options.checkForUpdates) {
     checkForUpdate(dispatch);
