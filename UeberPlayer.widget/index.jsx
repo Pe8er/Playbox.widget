@@ -32,6 +32,7 @@ const options = {
 /* ROOT STYLING */
 
 export const className = `
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
