@@ -1,6 +1,7 @@
 {
-  "name": "Playbox",
-  "description": "This widget shows information about currently playing song from either iTunes or Spotify.",
-  "author": "Piotr Gajos",
-  "email": "w1n7ermute@gmail.com"
+  "name": "UeberPlayer",
+  "description": "A widget to elegantly display the currently playing song from Apple Music or Spotify",
+  "author": "Daniel Hernandez",
+  "email": "tamdannyhdz@gmail.com",
+  "version": "1.2.2"
 }
