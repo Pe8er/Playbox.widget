@@ -75,7 +75,7 @@ on getSongMeta()
 				tell musicAppReference
 					set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
 					if musicapp is "Music" then
-						set isLoved to loved of current track as string
+						set isLoved to favorited of current track as string
 					else if musicapp is "Spotify" then
 						try
 							set isLoved to starred of current track as string
@@ -145,7 +145,7 @@ end grabCover
 on getLocalMusicArt()
 	tell application "Music" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
-		if format is class PNG  then -- figure out the proper file extension
+		if format is «class PNG » then -- figure out the proper file extension
 			set ext to ".png"
 		else
 			set ext to ".jpg"
