@@ -17,20 +17,22 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 
 if isMusicPlaying() is true then
-	pruneCovers()
 	getSongMeta()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
 	writeSongMeta({"darkMode" & "##" & checkDarkMode()})
 	
 	if didSongChange() is true then
-		delay 1
+		pruneCovers()
+		
 		writeSongMeta({"artistName" & "##" & artistName, "songName" & "##" & songName, "songDuration" & "##" & songDuration, "isLoved" & "##" & isLoved, "songChanged" & "##" & true})
 		if didCoverChange() is true then
 			set savedCoverURL to my readSongMeta({"coverURL"})
 			set currentCoverURL to grabCover()
 			if savedCoverURL is not currentCoverURL then writeSongMeta({"coverURL" & "##" & currentCoverURL})
 		end if
-		writeSongMeta({"albumName" & "##" & albumName})
+		
+		writeSongMeta({"artistName" & "##" & artistName, "songName" & "##" & songName, "albumName" & "##" & albumName, "songDuration" & "##" & songDuration, "isLoved" & "##" & isLoved, "songChanged" & "##" & true})
+		delay 0.5
 	else
 		writeSongMeta({"songChanged" & "##" & false, "isLoved" & "##" & isLoved})
 	end if
@@ -151,7 +153,11 @@ on getLocalMusicArt()
 			set ext to ".jpg"
 		end if
 	end tell
-	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 9) & ext as string -- get the filename to ~/my path/cover.ext
+	-- get epoch time in seconds to use for filename since ubersicht caches the artwork and a random number (0-9) can cause duplicate filenames occasionally
+	set currentEpochTime to (current date) - (date "Thursday, January 1, 1970 at 12:00:00 AM")
+	set currentEpochTimeInSeconds to currentEpochTime as inches as string
+	set randomNum to (random number from 0 to 9)
+	set fileName to (mypath as POSIX file) & currentEpochTimeInSeconds & randomNum & ext as string -- get the filename to ~/my path/cover.ext
 	set outFile to open for access file fileName with write permission -- write to file
 	set eof outFile to 0 -- truncate the file
 	write srcBytes to outFile -- write the image bytes to the file
