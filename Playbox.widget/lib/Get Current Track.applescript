@@ -17,30 +17,24 @@ set songMetaFile to (mypath & "songMeta.plist" as string)
 
 
 if isMusicPlaying() is true then
-	pruneCovers()
 	getSongMeta()
 	writeSongMeta({"currentPosition" & "##" & currentPosition})
 	writeSongMeta({"darkMode" & "##" & checkDarkMode()})
 	
 	if didSongChange() is true then
-		delay 1
-		writeSongMeta({Â
-			"artistName" & "##" & artistName, Â
-			"songName" & "##" & songName, Â
-			"songDuration" & "##" & songDuration, Â
-			"isLoved" & "##" & isLoved, Â
-			"songChanged" & "##" & Â
-			true})
+		pruneCovers()
+		
+		writeSongMeta({"artistName" & "##" & artistName, "songName" & "##" & songName, "songDuration" & "##" & songDuration, "isLoved" & "##" & isLoved, "songChanged" & "##" & true})
 		if didCoverChange() is true then
 			set savedCoverURL to my readSongMeta({"coverURL"})
 			set currentCoverURL to grabCover()
 			if savedCoverURL is not currentCoverURL then writeSongMeta({"coverURL" & "##" & currentCoverURL})
 		end if
-		writeSongMeta({"albumName" & "##" & albumName})
+		
+		writeSongMeta({"artistName" & "##" & artistName, "songName" & "##" & songName, "albumName" & "##" & albumName, "songDuration" & "##" & songDuration, "isLoved" & "##" & isLoved, "songChanged" & "##" & true})
+		delay 0.5
 	else
-		writeSongMeta({Â
-			"songChanged" & "##" & false, Â
-			"isLoved" & "##" & isLoved})
+		writeSongMeta({"songChanged" & "##" & false, "isLoved" & "##" & isLoved})
 	end if
 else
 	return
@@ -53,13 +47,13 @@ spitOutput(metaToGrab) as string
 ------------------------------------------------
 
 on isMusicPlaying()
-	set apps to {"iTunes", "Spotify"}
+	set apps to {"Music", "Spotify"}
 	set answer to false
 	repeat with anApp in apps
 		tell application "System Events" to set isRunning to (name of processes) contains anApp
 		if isRunning is true then
 			try
-				using terms from application "iTunes"
+				using terms from application "Music"
 					tell application anApp
 						if player state is playing then
 							set musicapp to (anApp as string)
@@ -78,12 +72,12 @@ end isMusicPlaying
 on getSongMeta()
 	try
 		set musicAppReference to a reference to application musicapp
-		using terms from application "iTunes"
+		using terms from application "Music"
 			try
 				tell musicAppReference
 					set {artistName, songName, albumName, songDuration} to {artist, name, album, duration} of current track
-					if musicapp is "iTunes" then
-						set isLoved to loved of current track as string
+					if musicapp is "Music" then
+						set isLoved to favorited of current track as string
 					else if musicapp is "Spotify" then
 						try
 							set isLoved to starred of current track as string
@@ -132,10 +126,10 @@ end didCoverChange
 
 on grabCover()
 	try
-		if musicapp is "iTunes" then
-			tell application "iTunes" to tell current track
+		if musicapp is "Music" then
+			tell application "Music" to tell current track
 				if exists (every artwork) then
-					my getLocaliTunesArt()
+					my getLocalMusicArt()
 				else
 					my getLastfmArt()
 				end if
@@ -150,16 +144,20 @@ on grabCover()
 	return currentCoverURL
 end grabCover
 
-on getLocaliTunesArt()
-	tell application "iTunes" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
+on getLocalMusicArt()
+	tell application "Music" to tell artwork 1 of current track -- get the raw bytes of the artwork into a var
 		set srcBytes to raw data
-		if format is Çclass PNG È then -- figure out the proper file extension
+		if format is Â«class PNG Â» then -- figure out the proper file extension
 			set ext to ".png"
 		else
 			set ext to ".jpg"
 		end if
 	end tell
-	set fileName to (mypath as POSIX file) & "cover" & (random number from 0 to 9) & ext as string -- get the filename to ~/my path/cover.ext
+	-- get epoch time in seconds to use for filename since ubersicht caches the artwork and a random number (0-9) can cause duplicate filenames occasionally
+	set currentEpochTime to (current date) - (date "Thursday, January 1, 1970 at 12:00:00â€¯AM")
+	set currentEpochTimeInSeconds to currentEpochTime as inches as string
+	set randomNum to (random number from 0 to 9)
+	set fileName to (mypath as POSIX file) & currentEpochTimeInSeconds & randomNum & ext as string -- get the filename to ~/my path/cover.ext
 	set outFile to open for access file fileName with write permission -- write to file
 	set eof outFile to 0 -- truncate the file
 	write srcBytes to outFile -- write the image bytes to the file
@@ -167,7 +165,7 @@ on getLocaliTunesArt()
 	set currentCoverURL to POSIX path of fileName
 	writeSongMeta({"oldFilename" & "##" & currentCoverURL})
 	set currentCoverURL to getPathItem(currentCoverURL)
-end getLocaliTunesArt
+end getLocalMusicArt
 
 on getSpotifyArt()
 	try
@@ -255,8 +253,7 @@ on writeSongMeta(keys)
 			-- create an empty property list dictionary item
 			set the parent_dictionary to make new property list item with properties {kind:record}
 			-- create new property list file using the empty dictionary list item as contents
-			set this_plistfile to Â
-				make new property list file with properties {contents:parent_dictionary, name:songMetaFile}
+			set this_plistfile to make new property list file with properties {contents:parent_dictionary, name:songMetaFile}
 		end if
 		try
 			repeat with aKey in keys
@@ -264,8 +261,7 @@ on writeSongMeta(keys)
 				set keyName to text item 1 of aKey
 				set keyValue to text item 2 of aKey
 				set AppleScript's text item delimiters to ""
-				make new property list item at end of property list items of contents of property list file songMetaFile Â
-					with properties {kind:string, name:keyName, value:keyValue}
+				make new property list item at end of property list items of contents of property list file songMetaFile with properties {kind:string, name:keyName, value:keyValue}
 			end repeat
 		on error e
 			my logEvent(e)
@@ -317,8 +313,7 @@ on number_to_string(this_number)
 		set x to the offset of "." in this_number
 		set y to the offset of "+" in this_number
 		set z to the offset of "E" in this_number
-		set the decimal_adjust to characters (y - (length of this_number)) thru Â
-			-1 of this_number as string as number
+		set the decimal_adjust to characters (y - (length of this_number)) thru -1 of this_number as string as number
 		if x is not 0 then
 			set the first_part to characters 1 thru (x - 1) of this_number as string
 		else
@@ -328,8 +323,7 @@ on number_to_string(this_number)
 		set the converted_number to the first_part
 		repeat with i from 1 to the decimal_adjust
 			try
-				set the converted_number to Â
-					the converted_number & character i of the second_part
+				set the converted_number to the converted_number & character i of the second_part
 			on error
 				set the converted_number to the converted_number & "0"
 			end try
